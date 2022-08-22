@@ -1,0 +1,7 @@
+*.pt
+*.txt
+*.png
+*.gif
+*.pyc
+*.zip
+/codes/S3Ball/Ball3DImg
