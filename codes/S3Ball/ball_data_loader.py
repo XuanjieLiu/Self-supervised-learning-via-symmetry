@@ -41,6 +41,7 @@ def load_a_img_seq_from_disk(seq_path):
 class BallDataLoader:
     def __init__(self, data_path='Ball3DImg/120_80_0.2_20/', is_load_all_data_dict=False):
         self.data_path = data_path
+        print(f'parent dir is : {os.listdir("../")}')
         self.f_list = os.listdir(data_path)  # 返回文件名
         random.shuffle(self.f_list)
         self.curr_load_idx = 0
