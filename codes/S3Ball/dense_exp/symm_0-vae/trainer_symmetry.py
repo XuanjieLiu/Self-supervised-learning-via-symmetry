@@ -202,7 +202,7 @@ class BallTrainer:
             #     R_sample_points, self.r_recon_batch_multiple,
             #     lambda z: symm_rotaY(z, R), lambda z: symm_rotaY(z, Rr)) if self.enable_SRSD else torch.zeros(1)
             T_z_loss = R_z_loss = torch.zeros(2)
-            T_recon_loss = R_recon_loss = torch.zeros(1)
+            T_recon_loss = R_recon_loss = torch.zeros(1)[0]
             loss = self.loss_func(vae_loss, rnn_loss, T_z_loss, R_z_loss, T_recon_loss, R_recon_loss, train_loss_counter)
             loss.backward()
             optimizer.step()
