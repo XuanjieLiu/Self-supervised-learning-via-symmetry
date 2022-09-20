@@ -3,7 +3,7 @@ import os
 data_root = '{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../../Ball3DImg')
 
 CONFIG = {
-    'train_data_path': f'{data_root}/32_32_0.2_20_3_init_points_subset_2048/',
+    'train_data_path': f'{data_root}/32_32_0.2_20_3_init_points_subset_2048_first_512/',
     'latent_code_num': 3,
     't_batch_multiple': 4,
     'r_batch_multiple': 4,
