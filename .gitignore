@@ -7,3 +7,6 @@
 /codes/S3Ball/Ball3DImg
 .idea
 *.rar
+slurm_*.out
+slurm_*.err
+
