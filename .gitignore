@@ -9,4 +9,5 @@
 *.rar
 slurm_*.out
 slurm_*.err
+*.sbatch
 
