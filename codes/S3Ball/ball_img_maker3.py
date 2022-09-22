@@ -28,7 +28,7 @@ MODE_MAKE_IMG = 'make_img'
 MODE_LOCATE = 'locate'
 MODE_OBV_ONLY = 'obv_only'
 
-RUNNING_MODE = MODE_LOCATE
+RUNNING_MODE = MODE_MAKE_IMG
 
 
 """
@@ -227,6 +227,7 @@ class BallViewer:
 
     def fastDrawBall(self):
         if self.first_render:
+            self.sub_folder_dir = IMG_SAVE_PATH + '/' + str(time.time())
             self.first_render = False
         else:
             img_name = f'{self.curr_idx}'
