@@ -22,6 +22,7 @@ SAMPLE_WEIGHT = 'sample_weight'
 """
 INIT_IDX = 'init_idx'
 ENABLE = 'enable'
+NAME = 'name'
 
 
 """
@@ -159,6 +160,7 @@ HENTAI_EVAL_DATA = [
 COLOR_INIT_ALWAYS_GREEN = [
     {
         INIT_IDX: 1,
+        NAME: 'Green',
         COLOR3F: [(c, c) for c in COLOR3F_GREEN],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
@@ -168,6 +170,7 @@ COLOR_INIT_ALWAYS_GREEN = [
 COLOR_INIT_ALWAYS_WHITE = [
     {
         INIT_IDX: 1,
+        NAME: 'White',
         COLOR3F: [(c, c) for c in COLOR3F_WHITE],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
@@ -177,6 +180,7 @@ COLOR_INIT_ALWAYS_WHITE = [
 COLOR_INIT_ALWAYS_RED = [
     {
         INIT_IDX: 1,
+        NAME: 'Red',
         COLOR3F: [(c, c) for c in COLOR3F_RED],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
@@ -186,6 +190,7 @@ COLOR_INIT_ALWAYS_RED = [
 COLOR_INIT_ALWAYS_BLUE = [
     {
         INIT_IDX: 1,
+        NAME: 'Blue',
         COLOR3F: [(c, c) for c in COLOR3F_BLUE],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
@@ -195,6 +200,7 @@ COLOR_INIT_ALWAYS_BLUE = [
 COLOR_INIT_ALWAYS_PINK = [
     {
         INIT_IDX: 1,
+        NAME: 'Pink',
         COLOR3F: [(c, c) for c in COLOR3F_PINK],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
@@ -204,6 +210,7 @@ COLOR_INIT_ALWAYS_PINK = [
 COLOR_INIT_ALWAYS_YELLOW = [
     {
         INIT_IDX: 1,
+        NAME: 'Yellow',
         COLOR3F: [(c, c) for c in COLOR3F_YELLOW],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
@@ -213,6 +220,7 @@ COLOR_INIT_ALWAYS_YELLOW = [
 COLOR_INIT_ALWAYS_CYAN = [
     {
         INIT_IDX: 1,
+        NAME: 'Cyan',
         COLOR3F: [(c, c) for c in COLOR3F_CYAN],
         SAMPLE_WEIGHT: 1,
         ENABLE: True
