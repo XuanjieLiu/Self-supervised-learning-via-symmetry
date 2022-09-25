@@ -201,7 +201,7 @@ if __name__ == "__main__":
     # img_np = img_tensor.numpy()
     # print(img_tensor[1].max().item())
 
-    check_path = 'Ball3DImg/(3, 2, 3)'
+    check_path = 'Ball3DImg/Pink'
     dc = BallDataLoader(check_path)
     dc.data_checker()
     dc.delete_traj_with_no_ball_imgs(is_delete=True)

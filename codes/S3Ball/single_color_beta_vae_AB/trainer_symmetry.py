@@ -15,17 +15,6 @@ from codes.loss_counter import LossCounter
 from codes.common_utils import create_results_path_if_not_exist
 
 
-def repeat_color_dim(z, repeat_times=None, sample_range=None):
-    length = z.size(1)
-    if sample_range is None:
-        sample_range = length
-    if repeat_times is None:
-        repeat_times = length
-    r_dim = random.sample(range(sample_range), 1)[0]
-    r_tensor = z[:, r_dim:r_dim+1, :]
-    return r_tensor.repeat(1, repeat_times, 1)
-
-
 def is_need_train(train_config):
     loss_counter = LossCounter([])
     iter_num = loss_counter.load_iter_num(train_config['train_record_path'])
@@ -45,8 +34,15 @@ def vector_z_score_norm(vector, mean=None, std=None):
     return (vector - mean) / std, mean, std
 
 
+def torch_set_seed(seed):
+    if seed is not None:
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+
+
 class BallTrainer:
-    def __init__(self, config, is_train=True):
+    def __init__(self, config, is_train=True, seed=None):
+        torch_set_seed(seed)
         self.model = Conv2dGruConv2d(config).cuda()
         self.train_data_loader = BallDataLoader(config['train_data_path'], is_train)
         self.eval_data_loader = BallDataLoader(config['eval_data_path'], not is_train)
@@ -59,10 +55,6 @@ class BallTrainer:
         self.z_symm_loss_scalar = config['z_symm_loss_scalar']
         self.enable_sample = config['enable_sample']
         self.checkpoint_interval = config['checkpoint_interval']
-        self.t_batch_multiple = config['t_batch_multiple']
-        self.r_batch_multiple = config['r_batch_multiple']
-        self.t_range = config['t_range']
-        self.r_range = config['r_range']
         self.learning_rate = config['learning_rate']
         self.scheduler_base_num = config['scheduler_base_num']
         self.max_iter_num = config['max_iter_num']
@@ -105,12 +97,14 @@ class BallTrainer:
         else:
             print("New model is initialized")
 
+
+
     def eval(self, epoch_num, iter_num, eval_loss_counter):
         print("=====================start eval=======================")
         eval_iter_num = self.eval_data_loader.get_iter_num_of_an_epoch(BATCH_SIZE)
         self.eval_data_loader.set_epoch_num(epoch_num)
         self.model.eval()
-        z_gt_s_list = []
+        z_gt_list = []
         z0_rnn_list = []
         vae_loss_list = []
         rnn_recon_loss_list = []
@@ -120,33 +114,28 @@ class BallTrainer:
             print(progress)
             data = data.cuda()
             data_shape = data.size()
-            z_gt, mu, logvar = self.model.batch_seq_encode_to_z(data)
-            z_gt_s = mu[..., 0:3]
-            z_gt_c = mu[..., 3:]
-            z_gt_cr = repeat_color_dim(z_gt_c, sample_range=self.base_len)
-            z_combine = torch.cat((z_gt_s, z_gt_cr), -1)
-            sample_points = list(range(mu.size(1)))[self.base_len:]
-            z0_rnn = self.model.predict_with_symmetry(z_gt_s, sample_points, lambda z: z)
-            rnn_recon_loss = self.calc_rnn_loss(data[:, 1:, :, :, :], z_gt_s, z0_rnn, z_gt_cr[:, :-1, :])[0].item()
-            vae_loss = self.calc_vae_loss(data, z_combine, mu, logvar)[0].item()
-            z_gt_s_list.append(z_gt_s.detach())
-            z0_rnn_list.append(z0_rnn.detach())
+            z_rp, mu, logvar = self.model.batch_seq_encode_to_z(data)
+            sample_points = list(range(z_rp.size(1)))[self.base_len:]
+            # z0_rnn = self.model.predict_with_symmetry(mu, sample_points, lambda z: z)
+            # rnn_recon_loss = self.calc_rnn_loss(data[:, 1:, :, :, :], mu, z0_rnn)[0].item()
+            vae_loss = self.calc_vae_loss(data, z_rp, mu, logvar)[0].item()
+            z_gt_list.append(z_rp.detach())
+            # z0_rnn_list.append(z0_rnn.detach())
             vae_loss_list.append(vae_loss)
-            rnn_recon_loss_list.append(rnn_recon_loss)
+            # rnn_recon_loss_list.append(rnn_recon_loss)
         self.model.train()
-        tensor_z_gt = torch.stack(z_gt_s_list)
-        tensor_z0_Rnn = torch.stack(z0_rnn_list)
+        tensor_z_gt = torch.stack(z_gt_list)
+        # tensor_z0_Rnn = torch.stack(z0_rnn_list)
         norm_z_gt, mean_z_gt, std_z_gt = vector_z_score_norm(tensor_z_gt)
-        norm_z0_Rnn, mean_z0_Rnn, std_z0_Rnn = vector_z_score_norm(tensor_z0_Rnn, mean_z_gt, std_z_gt)
-        rnn_z_loss = nn.MSELoss()(norm_z0_Rnn, norm_z_gt[:, :, 1:, :]).item()
+        # norm_z0_Rnn, mean_z0_Rnn, std_z0_Rnn = vector_z_score_norm(tensor_z0_Rnn, mean_z_gt, std_z_gt)
+        # rnn_z_loss = nn.MSELoss()(norm_z0_Rnn, norm_z_gt[:, :, 1:, :]).item()
         vae_recon_loss_iter_mean = np.mean(vae_loss_list) / data_shape[1] * (data_shape[1] - 1)
-        rnn_recon_loss_iter_mean = np.mean(rnn_recon_loss_list)
+        rnn_recon_loss_iter_mean = 0
         vae_recon_loss_pixel_mean = vae_recon_loss_iter_mean / data_shape[0] / (data_shape[1] - 1) / data_shape[2] / \
                                     data_shape[3] / data_shape[4]
-        rnn_recon_loss_pixel_mean = rnn_recon_loss_iter_mean / data_shape[0] / (data_shape[1] - 1) / data_shape[2] / \
-                                    data_shape[3] / data_shape[4]
+        rnn_recon_loss_pixel_mean = 0
         eval_loss_counter.add_values([vae_recon_loss_iter_mean, rnn_recon_loss_iter_mean,
-                                      vae_recon_loss_pixel_mean, rnn_recon_loss_pixel_mean, rnn_z_loss])
+                                      vae_recon_loss_pixel_mean, rnn_recon_loss_pixel_mean, 0])
         eval_loss_counter.record_and_clear(self.eval_record_path, iter_num, round_idx=4)
         print("=====================end eval=======================")
 
@@ -179,36 +168,11 @@ class BallTrainer:
             is_eval = i % self.eval_interval == 0
             epoch_num = new_epoch_num
             optimizer.zero_grad()
-            I_sample_points = self.gen_sample_points(self.base_len, data.size(1), i, self.enable_sample)
-            T_sample_points = self.gen_sample_points(self.base_len, data.size(1), i, self.enable_sample)
-            R_sample_points = self.gen_sample_points(self.base_len, data.size(1), i, self.enable_sample)
-            z_gt, mu, logvar = self.model.batch_seq_encode_to_z(data)
-            z_gt_s = z_gt[..., 0:3]
-            z_gt_c = z_gt[..., 3:]
-            z_gt_cr = repeat_color_dim(z_gt_c)
-            z_combine = torch.cat((z_gt_s, z_gt_cr), -1)
-            T, Tr = make_translation_batch(batch_size=BATCH_SIZE * self.t_batch_multiple, t_range=self.t_range)
-            R, Rr, theta = make_rotation_Y_batch(batch_size=BATCH_SIZE * self.r_batch_multiple,
-                                                 angel_range=self.r_range)
-            z0_rnn = self.model.predict_with_symmetry(z_gt_s, I_sample_points, lambda z: z)
-            vae_loss = self.calc_vae_loss(data, z_combine, mu, logvar, recon_list)
-            rnn_loss = self.calc_rnn_loss(data[:, 1:, :, :, :], z_gt_s, z0_rnn, z_gt_cr[:, :-1, :], recon_list)
-            T_z_loss = self.batch_symm_z_loss(
-                z_gt_s, z0_rnn, T_sample_points, self.t_batch_multiple,
-                lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr)
-            )
-            R_z_loss = self.batch_symm_z_loss(
-                z_gt_s, z0_rnn, R_sample_points, self.r_batch_multiple,
-                lambda z: symm_rotaY(z, R), lambda z: symm_rotaY(z, Rr)
-            )
-            T_recon_loss = self.batch_symm_recon_loss(
-                data[:, 1:, :, :, :], z_gt_s,
-                T_sample_points, self.t_batch_multiple, z_gt_cr[:, :-1, :],
-                lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr)) if self.enable_SRSD else torch.zeros(1)
-            R_recon_loss = self.batch_symm_recon_loss(
-                data[:, 1:, :, :, :], z_gt_s,
-                R_sample_points, self.t_batch_multiple, z_gt_cr[:, :-1, :],
-                lambda z: symm_rotaY(z, R), lambda z: symm_rotaY(z, Rr)) if self.enable_SRSD else torch.zeros(1)
+            z_rpm, mu, logvar = self.model.batch_seq_encode_to_z(data)
+            vae_loss = self.calc_vae_loss(data, z_rpm, mu, logvar, recon_list)
+            rnn_loss = torch.zeros(2)
+            T_z_loss = R_z_loss = torch.zeros(2)
+            T_recon_loss = R_recon_loss = torch.zeros(1)[0]
             loss = self.loss_func(vae_loss, rnn_loss, T_z_loss, R_z_loss, T_recon_loss, R_recon_loss, train_loss_counter)
             loss.backward()
             optimizer.step()
@@ -232,8 +196,8 @@ class BallTrainer:
             self.calc_symm_loss(z_gt_repeat, z0_rnn_repeat, z0_S_rnn, symm_reverse_func)
         return zloss_S_rnn_Sr__rnn / symm_batch_multiple, zloss_S_rnn_Sr__z1 / symm_batch_multiple
 
-    def calc_rnn_loss(self, x1, z_gt, z0_rnn, z_content, recon_list=None):
-        recon_next = self.model.batch_seq_decode_from_z(torch.cat((z0_rnn, z_content), -1))
+    def calc_rnn_loss(self, x1, z_gt, z0_rnn, recon_list=None):
+        recon_next = self.model.batch_seq_decode_from_z(z0_rnn)
         xloss_ERnnD = nn.BCELoss(reduction='sum')(recon_next, x1)
         zloss_Rnn = self.z_rnn_loss_scalar * self.mse_loss(z0_rnn, z_gt[:, 1:, :])
         if recon_list is not None:
@@ -255,12 +219,11 @@ class BallTrainer:
         zloss_S_rnn_Sr__z1 = self.z_symm_loss_scalar * self.mse_loss(z0_S_rnn_Sr, z1)
         return zloss_S_rnn_Sr__rnn, zloss_S_rnn_Sr__z1
 
-    def batch_symm_recon_loss(self, x1, z_gt, sample_points, symm_recon_batch_multiple, z_content, symm_func, symm_reverse_func):
+    def batch_symm_recon_loss(self, x1, z_gt, sample_points, symm_recon_batch_multiple, symm_func, symm_reverse_func):
         z_gt_repeat = z_gt.repeat(symm_recon_batch_multiple, 1, 1)
         z0_S_rnn = self.model.predict_with_symmetry(z_gt_repeat, sample_points, symm_func)
         z0_S_rnn_Sr = do_seq_symmetry(z0_S_rnn, symm_reverse_func)
-        z_content_rp = z_content.repeat(symm_recon_batch_multiple, 1, 1)
-        z0_S_rnn_Sr_D = self.model.batch_seq_decode_from_z(torch.cat((z0_S_rnn_Sr, z_content_rp), -1))
+        z0_S_rnn_Sr_D = self.model.batch_seq_decode_from_z(z0_S_rnn_Sr)
         x1_rp = x1.repeat(symm_recon_batch_multiple, 1, 1, 1, 1)
         symm_recon_loss = nn.BCELoss(reduction='sum')(z0_S_rnn_Sr_D, x1_rp) / symm_recon_batch_multiple
         return symm_recon_loss
@@ -273,11 +236,11 @@ class BallTrainer:
 
         loss = 0
         loss += xloss_ED + KLD + xloss_ERnnD
-        loss += zloss_Rnn
-        loss += zloss_T_rnn_Tr__z1 + zloss_R_rnn_Rr__z1
-        loss += T_recon_loss + R_recon_loss
-        if self.enable_SRS:
-            loss += zloss_T_rnn_Tr__rnn + zloss_R_rnn_Rr__rnn
+        # loss += zloss_Rnn
+        # loss += zloss_T_rnn_Tr__z1 + zloss_R_rnn_Rr__z1
+        # loss += T_recon_loss + R_recon_loss
+        # if self.enable_SRS:
+        #     loss += zloss_T_rnn_Tr__rnn + zloss_R_rnn_Rr__rnn
 
         loss_counter.add_values([xloss_ED.item(), xloss_ERnnD.item(), zloss_Rnn.item(),
                                  zloss_T_rnn_Tr__rnn.item(), zloss_R_rnn_Rr__rnn.item(),

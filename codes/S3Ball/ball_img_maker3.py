@@ -30,6 +30,7 @@ MODE_OBV_ONLY = 'obv_only'
 
 RUNNING_MODE = MODE_MAKE_IMG
 
+
 """
  7 | 8 | 9
 ——— ——— ———
@@ -38,8 +39,8 @@ RUNNING_MODE = MODE_MAKE_IMG
  1 | 2 | 3
 """
 
-BALL_INITIAL_STATE = NORMAL_DATA
-BALL_INITIAL_COLOR = COLOR_INIT_COLORFUL_CONTINUE
+BALL_INITIAL_STATE = FIXED_Y_DATA
+BALL_INITIAL_COLOR = COLOR_INIT_ALWAYS_PINK
 
 state_range = List[tuple]
 
@@ -75,9 +76,9 @@ def init_ball_color():
 
 
 class BallViewer:
-    def __init__(self, position):
-        self.fixed_position = position
-        self.img_save_path = os.path.join(IMG_FOLDER_PATH, str(position))
+    def __init__(self):
+        self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'{BALL_INITIAL_COLOR[0][NAME]}')
+        # self.img_save_path = os.path.join(IMG_FOLDER_PATH, str(position))
         if RUNNING_MODE == MODE_MAKE_IMG:
             os.makedirs(self.img_save_path, exist_ok=True)
         init_s, init_v = init_ball_state()
@@ -249,10 +250,8 @@ class BallViewer:
             self.color = init_ball_color()
             self.resetBallPosition(init_s)
             self.vX, self.vY, self.vZ = init_v
-        self.color = init_ball_color()
         self.last_position = [round(self.sX, 3), round(self.sY, 3), round(self.sZ, 3)]
-        # self.makeBall(self.sX, self.sY, self.sZ, self.color)
-        self.makeBall(*self.fixed_position, self.color)
+        self.makeBall(self.sX, self.sY, self.sZ, self.color)
 
         [self.sX, self.sY, self.sZ], [self.vX, self.vY, self.vZ] = ballNextState([self.sX, self.sY, self.sZ],
                                                                                  [self.vX, self.vY, self.vZ], DT)
@@ -383,5 +382,5 @@ class BallViewer:
 
 
 if __name__ == "__main__":
-    ballView = BallViewer(POSITION_LIST[2])
+    ballView = BallViewer()
     ballView.mainLoop()

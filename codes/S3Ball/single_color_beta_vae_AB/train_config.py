@@ -1,9 +1,8 @@
 import math
 
 CONFIG = {
-    'train_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue/',
-    # 'train_data_path': '../Ball3DImg/Mix/',
-    'latent_code_num': 5,
+    'train_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points/',
+    'latent_code_num': 3,
     'rnn_latent_code_num': 3,
     't_batch_multiple': 4,
     'r_batch_multiple': 4,

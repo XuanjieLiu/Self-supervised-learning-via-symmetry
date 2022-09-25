@@ -157,6 +157,39 @@ HENTAI_EVAL_DATA = [
 ]
 
 
+
+"""
+Fixed_Y_data
+ 7 | 8 | 9
+——— ——— ———
+ 4 | 5 | 6
+——— ——— ———
+ 1 | 2 | 3
+"""
+FIXED_Y_DATA = [
+    {
+        INIT_IDX: 1,
+        S0: [(-3, -1.5), (0.2, 3), (1, 3)],
+        V0: [(0.2, 2), (-8, 8), (0.2, 2.5)],
+        SAMPLE_WEIGHT: 1,
+        ENABLE: True
+    }, {
+        INIT_IDX: 2,
+        S0: [(-1.5, 1.5), (0.2, 3), (1, 2)],
+        V0: [(-1, 1), (-8, 8), (0, 2.5)],
+        SAMPLE_WEIGHT: 1,
+        ENABLE: True
+    }, {
+        INIT_IDX: 3,
+        S0: [(1.5, 3), (0.2, 3), (1, 3)],
+        V0: [(-2, -0.2), (-8, 8), (0.2, 2.5)],
+        SAMPLE_WEIGHT: 1,
+        ENABLE: True
+    },
+]
+
+
+
 COLOR_INIT_ALWAYS_GREEN = [
     {
         INIT_IDX: 1,
