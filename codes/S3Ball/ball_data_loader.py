@@ -143,6 +143,22 @@ class BallDataLoader:
             position_batch.append(position)
         return torch.stack(img_batch, dim=0).cuda(), torch.stack(position_batch, dim=0).cuda()
 
+    def IterWithPosition(self, batch_size):
+        assert len(self.f_list) % batch_size == 0
+        for i in range(0, len(self.f_list), batch_size):
+            f_list = self.f_list[i : i + batch_size]
+            img_batch = []
+            position_batch = []
+            for filename in f_list:
+                seq_path = os.path.join(self.data_path, filename)
+                img, position = self.load_a_img_seq_with_position(seq_path)
+                img_batch.append(img)
+                position_batch.append(position)
+            yield (
+                torch.stack(img_batch, dim=0), 
+                torch.stack(position_batch, dim=0), 
+            )
+
     def data_checker(self):
         for i in self.f_list:
             sub_folder = os.path.join(self.data_path, str(i))

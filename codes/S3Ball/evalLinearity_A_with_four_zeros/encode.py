@@ -22,17 +22,4 @@ def main():
             mu: torch.Tensor
             z_pos = mu[..., 0:3].detach()
             
-
-last_epoch = None
-def OneDataset(dataLoader: BallDataLoader):
-    epochs = set()
-    for _ in range(DATASET_SIZE // BATCH_SIZE):
-        batch, epoch, _ = dataLoader.load_a_batch_from_an_epoch(BATCH_SIZE)
-        epochs.add(epoch)
-        assert len(epochs) == 1
-        yield batch.to(DEVICE)
-    if last_epoch is not None:
-        assert epoch == last_epoch + 1
-    last_epoch = epoch
-
 main()
