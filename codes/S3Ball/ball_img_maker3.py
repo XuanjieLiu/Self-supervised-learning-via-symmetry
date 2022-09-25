@@ -20,7 +20,7 @@ DT = 0.2
 TRAJ_LEN = 20
 BALL_INIT_POSITION = [0.0, 1.0, 0.0]
 IMG_FOLDER_PATH = 'Ball3DImg'
-IMG_SAVE_PATH = f'{IMG_FOLDER_PATH}/same_position_diff_color'
+
 IMG_NAME_WITH_POSITION = True
 DRAW_GIRD = True
 
@@ -29,7 +29,6 @@ MODE_LOCATE = 'locate'
 MODE_OBV_ONLY = 'obv_only'
 
 RUNNING_MODE = MODE_MAKE_IMG
-
 
 """
  7 | 8 | 9
@@ -40,9 +39,19 @@ RUNNING_MODE = MODE_MAKE_IMG
 """
 
 BALL_INITIAL_STATE = NORMAL_DATA
-BALL_INITIAL_COLOR = COLOR_INIT_ALWAYS_GREEN
+BALL_INITIAL_COLOR = COLOR_INIT_COLORFUL_CONTINUE
 
 state_range = List[tuple]
+
+POSITION_LIST = [
+    (-2, 1.5, 1),
+    (1, 1, 1.5),
+    (3, 2, 3),
+    (-2, 2.5, 4),
+    (0, 4, 5),
+    (3.5, 1, 6),
+    (-4, 3.5, 8)
+]
 
 
 def init_random_states(s_range: state_range) -> List:
@@ -65,16 +74,12 @@ def init_ball_color():
     return color
 
 
-def make_dirs_if_need():
-    if RUNNING_MODE == MODE_MAKE_IMG:
-        if not os.path.isdir(IMG_FOLDER_PATH):
-            os.mkdir(IMG_FOLDER_PATH)
-        if not os.path.isdir(IMG_SAVE_PATH):
-            os.mkdir(IMG_SAVE_PATH)
-
-
 class BallViewer:
-    def __init__(self):
+    def __init__(self, position):
+        self.fixed_position = position
+        self.img_save_path = os.path.join(IMG_FOLDER_PATH, str(position))
+        if RUNNING_MODE == MODE_MAKE_IMG:
+            os.makedirs(self.img_save_path, exist_ok=True)
         init_s, init_v = init_ball_state()
         # 小球位置信息
         self.sX = init_s[0]
@@ -199,17 +204,17 @@ class BallViewer:
         glPopMatrix()
 
     def locate_with_ball(self):
-        self.makeBall(-3, 1, 1)
-        self.makeBall(0, 1, -1)
-        self.makeBall(3, 1, 1)
+        self.makeBall(-2, 1.5, 1)
+        self.makeBall(1, 1, 1.5)
+        self.makeBall(3, 2, 3)
 
-        self.makeBall(-5, 1, 4)
-        self.makeBall(0, 1, 4)
-        self.makeBall(4, 1, 4)
+        self.makeBall(-2, 2.5, 4)
+        self.makeBall(0, 4, 5)
+        self.makeBall(3.5, 1, 6)
 
-        self.makeBall(-4, 1, 8)
-        self.makeBall(2, 1, 8)
-        self.makeBall(8, 2, 8)
+        self.makeBall(-4, 3.5, 8)
+        # self.makeBall(2, 1, 8)
+        # self.makeBall(8, 2, 8)
 
     def drawBall(self):
         dt = time.time() - self.currTime
@@ -227,7 +232,7 @@ class BallViewer:
 
     def fastDrawBall(self):
         if self.first_render:
-            self.sub_folder_dir = IMG_SAVE_PATH + '/' + str(time.time())
+            self.sub_folder_dir = os.path.join(self.img_save_path, str(time.time()))
             self.first_render = False
         else:
             img_name = f'{self.curr_idx}'
@@ -238,14 +243,16 @@ class BallViewer:
             self.curr_idx += 1
         if self.curr_idx == TRAJ_LEN:
             self.curr_idx = 0
-            self.sub_folder_dir = IMG_SAVE_PATH + '/' + str(time.time())
+            self.sub_folder_dir = os.path.join(self.img_save_path, str(time.time()))
             os.mkdir(self.sub_folder_dir)
             init_s, init_v = init_ball_state()
             self.color = init_ball_color()
             self.resetBallPosition(init_s)
             self.vX, self.vY, self.vZ = init_v
+        self.color = init_ball_color()
         self.last_position = [round(self.sX, 3), round(self.sY, 3), round(self.sZ, 3)]
-        self.makeBall(self.sX, self.sY, self.sZ, self.color)
+        # self.makeBall(self.sX, self.sY, self.sZ, self.color)
+        self.makeBall(*self.fixed_position, self.color)
 
         [self.sX, self.sY, self.sZ], [self.vX, self.vY, self.vZ] = ballNextState([self.sX, self.sY, self.sZ],
                                                                                  [self.vX, self.vY, self.vZ], DT)
@@ -376,6 +383,5 @@ class BallViewer:
 
 
 if __name__ == "__main__":
-    make_dirs_if_need()
-    ballView = BallViewer()
+    ballView = BallViewer(POSITION_LIST[2])
     ballView.mainLoop()

@@ -145,7 +145,7 @@ class BallDataLoader:
 
     def data_checker(self):
         for i in self.f_list:
-            sub_folder = self.data_path + i
+            sub_folder = os.path.join(self.data_path, str(i))
             img_seq = os.listdir(sub_folder)
             if len(img_seq) < 20:
                 print(i)
@@ -154,7 +154,7 @@ class BallDataLoader:
         transform = transforms.Compose([transforms.ToTensor()])
         bad_traj_num = 0
         for i in self.f_list:
-            sub_folder = self.data_path + i
+            sub_folder = os.path.join(self.data_path, str(i))
             img_seq = os.listdir(sub_folder)
             for j in img_seq:
                 img = Image.open(sub_folder + '/' + j).convert('RGB')
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     # img_np = img_tensor.numpy()
     # print(img_tensor[1].max().item())
 
-    check_path = 'Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/'
+    check_path = 'Ball3DImg/(3, 2, 3)'
     dc = BallDataLoader(check_path)
     dc.data_checker()
     dc.delete_traj_with_no_ball_imgs(is_delete=True)
