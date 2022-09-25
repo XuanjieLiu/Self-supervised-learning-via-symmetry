@@ -39,6 +39,7 @@ def main():
                             line.append(repr(z_i.item()))
                         f.write(','.join(line))
                         f.write(' -> ')
+                        line.clear()
                         for coord_i in trajectory[i_in_batch, t, :]:
                             line.append(repr(coord_i.item()))
                         f.write(','.join(line))
