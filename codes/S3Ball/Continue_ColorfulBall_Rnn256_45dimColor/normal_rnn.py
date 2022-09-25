@@ -1,6 +1,6 @@
 import sys
 from os import path
-sys.path.append(path.join(path.dirname(path.abspath(__file__)), '../../../../'))
+sys.path.append(path.join(path.dirname(path.abspath(__file__)), '../../../'))
 
 import numpy as np
 import torch
@@ -8,6 +8,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import gzip
 from codes.S3Ball.symmetry import make_rotation_Y_batch, make_translation_batch
+from codes.S3Ball.shared import *
 
 # todo: make these parameters configurable
 BATCH_SIZE = 32
@@ -78,7 +79,7 @@ class Conv2dGruConv2d(nn.Module):
         return torch.load(path)
 
     def reparameterize(self, mu, logvar):
-        eps = Variable(torch.randn(mu.size(0), mu.size(1))).cuda()
+        eps = Variable(torch.randn(mu.size(0), mu.size(1))).to(DEVICE)
         z = mu + eps * torch.exp(logvar) * 0.5
         return z
 
@@ -116,7 +117,7 @@ class Conv2dGruConv2d(nn.Module):
 
     def predict_with_symmetry(self, z_gt, sample_points, symm_func):
         z_SR_seq_batch = []
-        hidden_r = torch.zeros([self.rnn_num_layers, z_gt.size(0), self.rnn_hidden_size]).cuda()
+        hidden_r = torch.zeros([self.rnn_num_layers, z_gt.size(0), self.rnn_hidden_size]).to(DEVICE)
         for i in range(z_gt.size(1)):
             """Schedule sample"""
             if i in sample_points:
