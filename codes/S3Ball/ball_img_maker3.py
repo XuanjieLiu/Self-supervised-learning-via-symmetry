@@ -40,7 +40,7 @@ RUNNING_MODE = MODE_MAKE_IMG
 """
 
 BALL_INITIAL_STATE = FIXED_Y_DATA
-BALL_INITIAL_COLOR = COLOR_INIT_ALWAYS_PINK
+BALL_INITIAL_COLOR = COLOR_INIT_COLORFUL_CONTINUE
 
 state_range = List[tuple]
 
@@ -77,7 +77,8 @@ def init_ball_color():
 
 class BallViewer:
     def __init__(self):
-        self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'{BALL_INITIAL_COLOR[0][NAME]}')
+        self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'same_color_Y_diff_zx_v2.0')
+        # self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'{BALL_INITIAL_COLOR[0][NAME]}')
         # self.img_save_path = os.path.join(IMG_FOLDER_PATH, str(position))
         if RUNNING_MODE == MODE_MAKE_IMG:
             os.makedirs(self.img_save_path, exist_ok=True)
