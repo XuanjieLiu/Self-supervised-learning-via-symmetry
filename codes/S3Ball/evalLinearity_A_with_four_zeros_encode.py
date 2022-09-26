@@ -31,6 +31,8 @@ def data2z(dataset_path, exp_groups):
         model.eval()
         with open(expGroup.z_coords_map_path, 'w') as f:
             for batch, trajectory in dataLoader.IterWithPosition(BATCH_SIZE):
+                batch = batch.to(DEVICE)
+                trajectory = trajectory.to(DEVICE)
                 # batch:      i_in_batch, t, color_channel, x, y
                 # trajectory: i_in_batch, t, coords_i
                 z, mu, logvar = model.batch_seq_encode_to_z(batch)

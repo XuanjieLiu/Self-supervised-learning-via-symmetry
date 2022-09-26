@@ -8,6 +8,7 @@ from tqdm import tqdm
 from shared import *
 from evalLinearity_A_with_four_zeros_shared import *
 
+
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, file_path: str, n_loops=1) -> None:
         super().__init__()
@@ -25,6 +26,7 @@ class Dataset(torch.utils.data.Dataset):
     def parseStrCoords(self, s: str):
         x, y, z = s.split(',')
         return float(x), float(y), float(z)
+
     def parseFileLine(self, line: str):
         z, coords = line.strip().split(' -> ')
         return self.parseStrCoords(z), self.parseStrCoords(coords)
@@ -43,6 +45,7 @@ class Dataset(torch.utils.data.Dataset):
             self.Y[index % self.trueLen()], 
         )
 
+
 def PersistentLoader(dataset, batch_size):
     while True:
         loader = torch.utils.data.DataLoader(
@@ -54,15 +57,18 @@ def PersistentLoader(dataset, batch_size):
                 break
             yield batch
 
+
 def getErr(X, Y) -> torch.Tensor:
     regression = LinearRegression().fit(X, Y)
     return Y - regression.predict(X)
+
 
 def getXZ(data: torch.Tensor):
     return torch.concat((
         data[:, 0].unsqueeze(1), 
         data[:, 2].unsqueeze(1), 
     ), dim=1)
+
 
 def main():
     for expGroup in EXP_GROUPS:
