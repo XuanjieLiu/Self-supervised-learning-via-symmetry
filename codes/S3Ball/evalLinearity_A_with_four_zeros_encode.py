@@ -12,12 +12,13 @@ from evalLinearity_A_with_four_zeros_shared import *
 
 DATASET_SIZE = 1024
 
-def main():
+
+def data2z(dataset_path, exp_groups):
     dataLoader = BallDataLoader(
-        './Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/', 
+        dataset_path,
         True, 
     )
-    for expGroup in tqdm(EXP_GROUPS):
+    for expGroup in tqdm(exp_groups):
         config = {
             **CONFIG, 
             'latent_code_num': expGroup.n_latent_dims, 
@@ -49,5 +50,6 @@ def main():
                         f.write(','.join(line))
                         f.write('\n')
 
+
 if __name__ == '__main__':
-    main()
+    data2z('./Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/', EXP_GROUPS)
