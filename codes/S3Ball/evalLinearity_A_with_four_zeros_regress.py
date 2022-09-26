@@ -70,29 +70,31 @@ def getXZ(data: torch.Tensor):
     ), dim=1)
 
 
-def main():
+def calc_group_mse(expGroup):
+    dataset = Dataset(expGroup.z_coords_map_path)
+    xz_err = getErr(
+        getXZ(dataset.X),
+        getXZ(dataset.Y),
+    )
+    x_mse = xz_err[:, 0].square().mean().item()
+    z_mse = xz_err[:, 1].square().mean().item()
+    xz_mse = xz_err.square().mean().item()
+    assert abs((x_mse + z_mse) * .5 - xz_mse) < 1e-5
+
+    y_err = getErr(
+        dataset.X[:, 1].unsqueeze(1),
+        dataset.Y[:, 1].unsqueeze(1),
+    )
+    y_mse = y_err.square().mean().item()
+    xyz_mse = (x_mse + z_mse + y_mse) / 3
+    return x_mse, y_mse, z_mse, xyz_mse
+
+
+if __name__ == '__main__':
     for expGroup in EXP_GROUPS:
         print(expGroup.display_name)
-        dataset = Dataset(expGroup.z_coords_map_path)
-        xz_err = getErr(
-            getXZ(dataset.X), 
-            getXZ(dataset.Y), 
-        )
-        x_mse = xz_err[:, 0].square().mean().item()
-        z_mse = xz_err[:, 1].square().mean().item()
-        xz_mse = xz_err.square().mean().item()
-        assert abs((x_mse + z_mse) * .5 - xz_mse) < 1e-5
-
-        y_err = getErr(
-            dataset.X[:, 1].unsqueeze(1), 
-            dataset.Y[:, 1].unsqueeze(1), 
-        )
-        y_mse = y_err.square().mean().item()
-        xyz_mse = (x_mse + z_mse + y_mse) / 3
-
+        x_mse, y_mse, z_mse, xyz_mse = calc_group_mse(expGroup)
         print(  'x_mse', format(  x_mse, '.2f'))
         print(  'y_mse', format(  y_mse, '.2f'))
         print(  'z_mse', format(  z_mse, '.2f'))
         print('xyz_mse', format(xyz_mse, '.2f'))
-
-main()
