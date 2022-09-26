@@ -18,7 +18,11 @@ def main():
         True, 
     )
     for expGroup in tqdm(EXP_GROUPS):
-        model = Conv2dGruConv2d(CONFIG).to(DEVICE)
+        config = {
+            **CONFIG, 
+            'latent_code_num': expGroup.n_latent_dims, 
+        }
+        model = Conv2dGruConv2d(config).to(DEVICE)
         model.load_state_dict(torch.load(
             expGroup.checkpoint_path, 
             map_location=DEVICE,
