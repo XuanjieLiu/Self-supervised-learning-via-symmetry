@@ -43,3 +43,5 @@ eG.display_name = 'AE+RNN 2, with Symmetry'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/ae_aug_4_2.txt'
 eG.n_latent_dims = 5
 EXP_GROUPS.append(eG)
+
+
