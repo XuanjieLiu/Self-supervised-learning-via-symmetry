@@ -24,18 +24,21 @@ N_LATENT_DIM = 5
 
 EXTENT = [-Z_RADIUS, Z_RADIUS, -Z_RADIUS, Z_RADIUS]
 
-CHECKPOINT_PATH = './evalSynthesis/continue_symm4_VAE_1_cp140000.pt'
+CHECKPOINT_PATHS_BENCHMARK = [
+    ('Ours', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
+    ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
+    # todo: beta vae
+]
 CHECKPOINT_PATHS_COLOR = [
-    ('VAE', CHECKPOINT_PATH), 
-    ('AE 1', './evalSynthesis/continue_symm4_AE_1_cp130000.pt'), 
-    ('AE 2', './evalSynthesis/continue_symm4_AE_2_cp150000.pt'), 
+    ('VAE',  './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
+    ('AE 1', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_1_cp130000.pt'), 
+    ('AE 2', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_2_cp150000.pt'), 
 ]
 
 def main():
-    vae = loadModel(CHECKPOINT_PATH)
-    # plotFiveDims(vae)
+    plotFiveDims()
     # plotColor()
-    plotColorDisentangle(vae)
+    # plotColorDisentangle(loadModel(CHECKPOINT_PATHS_BENCHMARK[0][1]))
 
 @lru_cache(len(CHECKPOINT_PATHS_COLOR))
 def loadModel(checkpoint_path):
@@ -56,15 +59,15 @@ def hideTicks(ax: Axes):
         labelbottom=False, 
     )
 
-def plotFiveDims(model):
-    N_COLS = 13
-    assert N_COLS % 2 == 1  # to show z=0
-    FIGSIZE = (5.5, 2.5)
-    Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, N_COLS)
+def plotFiveDims():
+    N_ROWS = 13
+    assert N_ROWS % 2 == 1  # to show z=0
+    FIGSIZE = (5.5, 6)
+    Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, N_ROWS)
 
     fig = plt.figure(figsize=FIGSIZE)
     axeses: List[List[Axes]] = fig.subplots(
-        N_LATENT_DIM, N_COLS, 
+        N_LATENT_DIM, N_ROWS, 
         sharex=True, sharey=True, 
     )
     fig.subplots_adjust(
@@ -180,11 +183,8 @@ def plotColorDisentangle(model):
                 drawCross(ax, 0, 0)
                 drawCross(midAx, default_z[3], default_z[4])
             # ax.set_title('')
-            ax.set_ylabel('$z_%d$' % (i + 1))
-            ax.set_xlabel(
-                '$z_%d$' % (j + 1), rotation=0, 
-                # labelpad=15, 
-            )
+            ax.set_ylabel('$z_%d$' % (i + 1), rotation=0)
+            ax.set_xlabel('$z_%d$' % (j + 1))
             # hideTicks(ax)
 
     fig.suptitle('Detected color of the synthesized ball')
@@ -212,6 +212,6 @@ def detectBallColor(img: torch.Tensor):
     metric = saturation + luminosity * .3
     # metric = luminosity
     argmax = metric.max() == metric
-    return img[argmax, :]
+    return img[argmax, :][0, :]
 
 main()
