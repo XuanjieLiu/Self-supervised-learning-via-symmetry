@@ -1,3 +1,4 @@
+
 # Encode the bouncing ball video test set. 
 # i.e. generate the linear projection training set. 
 
@@ -6,7 +7,9 @@ from functools import lru_cache
 
 import torch
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
+from matplotlib.figure import SubFigure
 from tqdm import tqdm
 
 from Continue_ColorfulBall_Rnn256_45dimColor.normal_rnn import (
@@ -17,7 +20,7 @@ from Continue_ColorfulBall_Rnn256_45dimColor.train_config import CONFIG
 from shared import *
 import rc_params
 
-# rc_params.init()
+rc_params.init()
 
 Z_RADIUS = 2
 N_LATENT_DIM = 5
@@ -26,7 +29,8 @@ EXTENT = [-Z_RADIUS, Z_RADIUS, -Z_RADIUS, Z_RADIUS]
 
 CHECKPOINT_PATHS_BENCHMARK = [
     ('Ours', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
-    ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
+    ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'), 
+    ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'), 
     # todo: beta vae
 ]
 CHECKPOINT_PATHS_COLOR = [
@@ -40,7 +44,7 @@ def main():
     # plotColor()
     # plotColorDisentangle(loadModel(CHECKPOINT_PATHS_BENCHMARK[0][1]))
 
-@lru_cache(len(CHECKPOINT_PATHS_COLOR))
+@lru_cache(3)
 def loadModel(checkpoint_path):
     model = Conv2dGruConv2d(CONFIG).to(DEVICE)
     model.load_state_dict(torch.load(
@@ -60,38 +64,51 @@ def hideTicks(ax: Axes):
     )
 
 def plotFiveDims():
-    N_ROWS = 13
+    NECK_LINE_Y = .955
+    WIDTH_RATIOS = [.34, .01, .3, .01, .3]
+    N_ROWS = 9
     assert N_ROWS % 2 == 1  # to show z=0
-    FIGSIZE = (5.5, 6)
+    FIGSIZE = (11, 7.5)
     Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, N_ROWS)
 
-    fig = plt.figure(figsize=FIGSIZE)
-    axeses: List[List[Axes]] = fig.subplots(
-        N_LATENT_DIM, N_ROWS, 
-        sharex=True, sharey=True, 
+    fig = plt.figure(constrained_layout=True, figsize=FIGSIZE)
+    N_SUBFIGS = len(CHECKPOINT_PATHS_BENCHMARK) * 2 - 1
+    subfigs: List[SubFigure] = fig.subfigures(
+        1, N_SUBFIGS, width_ratios=WIDTH_RATIOS, 
     )
-    fig.subplots_adjust(
-        wspace=0.1, hspace=0.1, 
-        left=.05, right=.98, 
-        top=.96, 
-    )
-    for row_i, axes in tqdm(enumerate(axeses)):
-        for col_i, ax in enumerate(axes):
-            z_val = Z_LADDER[col_i]
-            z = torch.zeros((N_LATENT_DIM, ))
-            z[row_i] = z_val
-            img = synth(model, z)
-            ax.imshow(img, extent=EXTENT)
-            hideTicks(ax)
-            if col_i == 0:
-                ax.set_ylabel(
-                    '$z_%d$' % (row_i + 1), rotation=0, 
-                    # labelpad=10, 
-                )
-                ax.yaxis.set_label_coords(-.4, .25)
-            if row_i == N_LATENT_DIM - 1:
-                if col_i % 3 == 0:
-                    ax.set_xlabel(format(z_val, '.1f'))
+    for subfig_i, subfig in enumerate(subfigs[0::2]):
+        (
+            model_display, checkpoint_path, 
+        ) = CHECKPOINT_PATHS_BENCHMARK[subfig_i]
+        model = loadModel(checkpoint_path)
+        axeses: List[List[Axes]] = subfig.subplots(
+            N_ROWS, N_LATENT_DIM, 
+            sharex=True, sharey=True, 
+        )
+        for row_i, axes in tqdm(enumerate(axeses), model_display):
+            for col_i, ax in enumerate(axes):
+                z_val = Z_LADDER[row_i]
+                z = torch.zeros((N_LATENT_DIM, ))
+                z[col_i] = z_val
+                img = synth(model, z)
+                ax.imshow(img, extent=EXTENT)
+                hideTicks(ax)
+                if row_i == 0:
+                    ax.set_title(
+                        '$z_%d$' % (col_i + 1), 
+                    )
+                if subfig_i == 0 and col_i == 0:
+                    if row_i % 2 == 0:
+                        ax.set_ylabel(
+                            '$%.1f$' % z_val, 
+                            rotation=0, 
+                        )
+                        ax.yaxis.set_label_coords(-.4, .3)
+        subfig.suptitle(model_display)
+        neckLine = Line2D(
+            [0, 1], [NECK_LINE_Y], color='k', linewidth=1.5, 
+        )
+        subfig.add_artist(neckLine)
     plt.show()
 
 def synth(model: Conv2dGruConv2d, *args):
