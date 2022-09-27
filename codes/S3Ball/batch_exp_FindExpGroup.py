@@ -2,11 +2,11 @@ import os
 import sys
 sys.path.append('{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../../'))
 from codes.S3Ball.evalLinearity_A_with_four_zeros_encode import data2z
-from evalLinearity_A_with_four_zeros_shared import ExpGroup
+from evalLinearity_shared import ExpGroup
 from typing import List
 
 
-CHECK_POINT_NUM_LIST = [i*10000 for i in range(8, 16)]
+CHECK_POINT_NUM_LIST = [i*10000 for i in range(4, 16)]
 SUB_EXP_LIST = [str(i) for i in range(1, 11)]
 DATASET_PATH = './Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/'
 BATCH_ROOT = "batch_exp/"
