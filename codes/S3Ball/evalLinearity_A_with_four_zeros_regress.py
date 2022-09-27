@@ -111,7 +111,6 @@ def main():
             col[row_i] = s
     
     sIO = StringIO()
-    print(r'\begin{table}[t]', file=sIO)
     print(r'\begin{center}', file=sIO)
     print(r'\begin{tabular}{l|cccc}', file=sIO)
 
@@ -134,7 +133,6 @@ def main():
     
     print(r'\end{tabular}', file=sIO)
     print(r'\end{center}', file=sIO)
-    print(r'\end{table}', file=sIO)
 
     sIO.seek(0)
     s = sIO.read()
