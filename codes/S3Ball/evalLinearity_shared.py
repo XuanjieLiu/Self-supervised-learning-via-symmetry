@@ -67,7 +67,7 @@ ae_2 = eG
 
 QUANT_EXP_GROUPS: List[ExpGroup] = [
     ours, ablat, beta_vae, 
-    ae_1, ae_2, 
+    # ae_1, ae_2, 
 ]
 
 VISUAL_EXP_GROUPS: List[ExpGroup] = [
