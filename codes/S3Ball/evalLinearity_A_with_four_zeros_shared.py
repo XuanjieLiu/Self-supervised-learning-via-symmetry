@@ -25,10 +25,10 @@ eG.n_latent_dims = 5
 EXP_GROUPS.append(eG)
 
 eG = ExpGroup()
-eG.checkpoint_path = './single_color_beta_vae_AB/checkpoint_110000.pt'
+eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/????'
 eG.display_name = '$\\beta$-VAE'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/beta_vae.txt'
-eG.n_latent_dims = 3
+eG.n_latent_dims = 5
 EXP_GROUPS.append(eG)
 
 eG = ExpGroup()
