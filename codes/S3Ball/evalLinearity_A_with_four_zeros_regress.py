@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
 from shared import *
-from evalLinearity_A_with_four_zeros_shared import *
+from evalLinearity_shared import *
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -72,9 +72,12 @@ def getXZ(data: torch.Tensor):
 
 def calc_group_mse(expGroup):
     dataset = Dataset(expGroup.z_coords_map_path)
+    X = dataset.X
+    std = dataset.Y.std(dim=0)
+    Y = dataset.Y / std
     xz_err = getErr(
-        getXZ(dataset.X),
-        getXZ(dataset.Y),
+        getXZ(X),
+        getXZ(Y),
     )
     x_mse = xz_err[:, 0].square().mean().item()
     z_mse = xz_err[:, 1].square().mean().item()
@@ -82,19 +85,22 @@ def calc_group_mse(expGroup):
     assert abs((x_mse + z_mse) * .5 - xz_mse) < 1e-5
 
     y_err = getErr(
-        dataset.X[:, 1].unsqueeze(1),
-        dataset.Y[:, 1].unsqueeze(1),
+        X[:, 1].unsqueeze(1),
+        Y[:, 1].unsqueeze(1),
     )
     y_mse = y_err.square().mean().item()
+
     xyz_mse = (x_mse + z_mse + y_mse) / 3
     return x_mse, y_mse, z_mse, xyz_mse
 
-
-if __name__ == '__main__':
-    for expGroup in EXP_GROUPS:
+def main():
+    for expGroup in QUANT_EXP_GROUPS:
         print(expGroup.display_name)
         x_mse, y_mse, z_mse, xyz_mse = calc_group_mse(expGroup)
         print(  'x_mse', format(  x_mse, '.2f'))
         print(  'y_mse', format(  y_mse, '.2f'))
         print(  'z_mse', format(  z_mse, '.2f'))
         print('xyz_mse', format(xyz_mse, '.2f'))
+
+if __name__ == '__main__':
+    main()
