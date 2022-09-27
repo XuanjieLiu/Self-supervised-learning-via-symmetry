@@ -40,8 +40,8 @@ CHECKPOINT_PATHS_COLOR = [
 ]
 
 def main():
-    # plotFiveDims()
-    plotColor()
+    plotNDims(3)
+    # plotColor()
     # plotColorDisentangle(loadModel(CHECKPOINT_PATHS_BENCHMARK[0][1]))
 
 @lru_cache(3)
@@ -63,52 +63,56 @@ def hideTicks(ax: Axes):
         labelbottom=False, 
     )
 
-def plotFiveDims():
-    NECK_LINE_Y = .955
-    WIDTH_RATIOS = [.34, .01, .3, .01, .3]
-    N_ROWS = 9
-    assert N_ROWS % 2 == 1  # to show z=0
-    FIGSIZE = (11, 7.5)
-    Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, N_ROWS)
+def plotNDims(n=3):
+    FIGSIZE = (11, 7)
+    NECK_LINE_X = .02
+    HEIGHT_RATIOS = [.3, .02, .3, .02, .34]
+    LEN_Z_LADDER = 19
+    assert LEN_Z_LADDER % 2 == 1  # to show z=0
+    Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, LEN_Z_LADDER)
 
     fig = plt.figure(constrained_layout=True, figsize=FIGSIZE)
     N_SUBFIGS = len(CHECKPOINT_PATHS_BENCHMARK) * 2 - 1
     subfigs: List[SubFigure] = fig.subfigures(
-        1, N_SUBFIGS, width_ratios=WIDTH_RATIOS, 
+        N_SUBFIGS, 1, height_ratios=HEIGHT_RATIOS, 
     )
-    for subfig_i, subfig in enumerate(subfigs[0::2]):
+    for expGroup_i, subfig in enumerate(subfigs[0::2]):
         (
             model_display, checkpoint_path, 
-        ) = CHECKPOINT_PATHS_BENCHMARK[subfig_i]
+        ) = CHECKPOINT_PATHS_BENCHMARK[expGroup_i]
         model = loadModel(checkpoint_path)
         axeses: List[List[Axes]] = subfig.subplots(
-            N_ROWS, N_LATENT_DIM, 
+            n, LEN_Z_LADDER, 
             sharex=True, sharey=True, 
         )
         for row_i, axes in tqdm(enumerate(axeses), model_display):
             for col_i, ax in enumerate(axes):
-                z_val = Z_LADDER[row_i]
+                z_val = Z_LADDER[col_i]
                 z = torch.zeros((N_LATENT_DIM, ))
-                z[col_i] = z_val
+                z[row_i] = z_val
                 img = synth(model, z)
                 ax.imshow(img, extent=EXTENT)
                 hideTicks(ax)
-                if row_i == 0:
-                    ax.set_title(
-                        '$z_%d$' % (col_i + 1), 
+                if col_i == 0:
+                    ax.set_ylabel(
+                        '$z_%d$' % (row_i + 1), 
+                        rotation=0, 
                     )
-                if subfig_i == 0 and col_i == 0:
-                    # if row_i % 2 == 0:
-                        ax.set_ylabel(
+                    ax.yaxis.set_label_coords(-.4, .3)
+                if expGroup_i == len(
+                    CHECKPOINT_PATHS_BENCHMARK
+                ) - 1 and row_i == n - 1:
+                    if col_i % 2 == 0:
+                        ax.set_xlabel(
                             '$%.1f$' % z_val, 
-                            rotation=0, 
                         )
-                        ax.yaxis.set_label_coords(-.4, .3)
         subfig.suptitle(model_display)
-        neckLine = Line2D(
-            [0, 1], [NECK_LINE_Y], color='k', linewidth=1.5, 
-        )
-        subfig.add_artist(neckLine)
+        # neckLine = Line2D(
+        #     [NECK_LINE_X], 
+        #     [0, 1], 
+        #     color='k', linewidth=1.5, 
+        # )
+        # subfig.add_artist(neckLine)
     plt.show()
 
 def synth(model: Conv2dGruConv2d, *args):
