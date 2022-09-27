@@ -42,4 +42,4 @@ def data2z(dataset_path, exp_groups):
 
 
 if __name__ == '__main__':
-    data2z('./Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/', QUANT_EXP_GROUPS)
+    data2z('./Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/', QUANT_EXP_GROUPS)

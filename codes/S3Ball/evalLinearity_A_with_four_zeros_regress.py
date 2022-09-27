@@ -1,9 +1,12 @@
+import os
 from functools import lru_cache
+from io import StringIO
 
 import torch
 import torch.utils.data
 from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
+import pyperclip
 
 from shared import *
 from evalLinearity_shared import *
@@ -94,13 +97,52 @@ def calc_group_mse(expGroup):
     return x_mse, y_mse, z_mse, xyz_mse
 
 def main():
-    for expGroup in QUANT_EXP_GROUPS:
-        print(expGroup.display_name)
-        x_mse, y_mse, z_mse, xyz_mse = calc_group_mse(expGroup)
-        print(  'x_mse', format(  x_mse, '.2f'))
-        print(  'y_mse', format(  y_mse, '.2f'))
-        print(  'z_mse', format(  z_mse, '.2f'))
-        print('xyz_mse', format(xyz_mse, '.2f'))
+    cols = [[] for _ in range(4)]
+    for row_i, expGroup in enumerate(QUANT_EXP_GROUPS):
+        for col_i, result in enumerate(calc_group_mse(expGroup)):
+            cols[col_i].append(result)
+    for col in cols:
+        _min = min(col)
+        for row_i, result in enumerate(col):
+            s = format(result, '.2f')
+            if result == _min:
+                s = r'\bm{%s}' % s
+            s = '$%s$' % s
+            col[row_i] = s
+    
+    sIO = StringIO()
+    print(r'\begin{center}', file=sIO)
+    print(r'\begin{tabular}{l|cccc}', file=sIO)
+
+    print('Method ', end='', file=sIO)
+    for dim in 'xyz':
+        # print(
+        #     '& MSE on $d_%s / \mathrm{std}(d_%s)$ \downarrow ' 
+        #     % (dim, dim), end='', file=sIO, 
+        # )
+        print('& $', dim, '$ axis MSE $\downarrow$ ', sep='', end='', file=sIO)
+    print('& MSE $\downarrow$ ', file=sIO)
+    print(r'\\ \hline', file=sIO)
+
+    for row_i, expGroup in enumerate(QUANT_EXP_GROUPS):
+        print(expGroup.display_name, end='', file=sIO)
+        for col in cols:
+            print('&', col[row_i], '', end='', file=sIO)
+        if row_i < 2:
+            print(r'\\ ', file=sIO)
+    
+    print(r'\end{tabular}', file=sIO)
+    print(r'\end{center}', file=sIO)
+
+    sIO.seek(0)
+    s = sIO.read()
+    print()
+    print()
+    print(s)
+    print()
+    print()
+    pyperclip.copy(s)
+    print('Copied to clipboard.')
 
 if __name__ == '__main__':
     main()
