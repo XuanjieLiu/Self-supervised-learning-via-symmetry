@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
 from shared import *
-from evalLinearity_A_with_four_zeros_shared import *
+from evalLinearity_shared import *
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -72,6 +72,7 @@ def getXZ(data: torch.Tensor):
 
 def calc_group_mse(expGroup):
     dataset = Dataset(expGroup.z_coords_map_path)
+    dataset.X[:, 0]
     xz_err = getErr(
         getXZ(dataset.X),
         getXZ(dataset.Y),
@@ -91,7 +92,7 @@ def calc_group_mse(expGroup):
 
 
 if __name__ == '__main__':
-    for expGroup in EXP_GROUPS:
+    for expGroup in QUANT_EXP_GROUPS:
         print(expGroup.display_name)
         x_mse, y_mse, z_mse, xyz_mse = calc_group_mse(expGroup)
         print(  'x_mse', format(  x_mse, '.2f'))

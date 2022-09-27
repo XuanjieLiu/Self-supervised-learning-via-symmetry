@@ -3,7 +3,6 @@
 # i.e. generate the linear projection training set. 
 
 from typing import List
-from functools import lru_cache
 
 import torch
 from matplotlib import pyplot as plt
@@ -18,6 +17,7 @@ from Continue_ColorfulBall_Rnn256_45dimColor.normal_rnn import (
 )
 from Continue_ColorfulBall_Rnn256_45dimColor.train_config import CONFIG
 from shared import *
+from evalLinearity_shared import *
 import rc_params
 
 rc_params.init()
@@ -27,32 +27,15 @@ N_LATENT_DIM = 5
 
 EXTENT = [-Z_RADIUS, Z_RADIUS, -Z_RADIUS, Z_RADIUS]
 
-CHECKPOINT_PATHS_BENCHMARK = [
-    ('Ours', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
-    ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'), 
-    ('$\\beta$-VAE', './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_checkpoint_150000.pt'), 
-]
-CHECKPOINT_PATHS_COLOR = [
-    ('VAE',  './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
-    ('AE 1', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_1_cp130000.pt'), 
-    ('AE 2', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_2_cp150000.pt'), 
-    ('$\\beta$-VAE', './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_checkpoint_150000.pt'), 
+RAINBOW_EXP_GROUPS: List[ExpGroup] = [
+    ours, beta_vae, 
+    ae_1, ae_2, 
 ]
 
 def main():
     plotNDims(3)
     # plotColor()
-    # plotColorDisentangle(loadModel(CHECKPOINT_PATHS_BENCHMARK[0][1]))
-
-@lru_cache(3)
-def loadModel(checkpoint_path):
-    model = Conv2dGruConv2d(CONFIG).to(DEVICE)
-    model.load_state_dict(torch.load(
-        checkpoint_path, 
-        map_location=DEVICE,
-    ))
-    model.eval()
-    return model
+    # plotColorDisentangle(loadModel())
 
 def hideTicks(ax: Axes):
     ax.tick_params(
@@ -72,20 +55,18 @@ def plotNDims(n=3):
     Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, LEN_Z_LADDER)
 
     fig = plt.figure(constrained_layout=True, figsize=FIGSIZE)
-    N_SUBFIGS = len(CHECKPOINT_PATHS_BENCHMARK) * 2 - 1
+    N_SUBFIGS = len(VISUAL_EXP_GROUPS) * 2 - 1
     subfigs: List[SubFigure] = fig.subfigures(
         N_SUBFIGS, 1, height_ratios=HEIGHT_RATIOS, 
     )
     for expGroup_i, subfig in enumerate(subfigs[0::2]):
-        (
-            model_display, checkpoint_path, 
-        ) = CHECKPOINT_PATHS_BENCHMARK[expGroup_i]
-        model = loadModel(checkpoint_path)
+        expGroup = VISUAL_EXP_GROUPS[expGroup_i]
+        model = loadModel(expGroup.checkpoint_path)
         axeses: List[List[Axes]] = subfig.subplots(
             n, LEN_Z_LADDER, 
             sharex=True, sharey=True, 
         )
-        for row_i, axes in tqdm(enumerate(axeses), model_display):
+        for row_i, axes in tqdm(enumerate(axeses), expGroup.display_name):
             for col_i, ax in enumerate(axes):
                 z_val = Z_LADDER[col_i]
                 z = torch.zeros((N_LATENT_DIM, ))
@@ -100,13 +81,13 @@ def plotNDims(n=3):
                     )
                     ax.yaxis.set_label_coords(-.4, .3)
                 if expGroup_i == len(
-                    CHECKPOINT_PATHS_BENCHMARK
+                    VISUAL_EXP_GROUPS
                 ) - 1 and row_i == n - 1:
                     if col_i % 2 == 0:
                         ax.set_xlabel(
                             '$%.1f$' % z_val, 
                         )
-        subfig.suptitle(model_display)
+        subfig.suptitle(expGroup.display_name)
         # neckLine = Line2D(
         #     [NECK_LINE_X], 
         #     [0, 1], 
@@ -141,23 +122,23 @@ def plotColor():
     LOC_ZERO = torch.zeros((3, ))
 
     fig, axes = plt.subplots(
-        ncols=len(CHECKPOINT_PATHS_COLOR), 
+        ncols=len(RAINBOW_EXP_GROUPS), 
         sharex=True, sharey=True, 
     )
-    if len(CHECKPOINT_PATHS_COLOR) == 1:
+    if len(RAINBOW_EXP_GROUPS) == 1:
         axes = [axes]   # for debug
-    for ((model_display, checkpoint_path), ax) in zip(
-        CHECKPOINT_PATHS_COLOR, axes, 
+    for (expGroup, ax) in zip(
+        RAINBOW_EXP_GROUPS, axes, 
     ):
-        model = loadModel(checkpoint_path)
+        model = loadModel(expGroup.checkpoint_path)
         canvas = torch.zeros((RESOLUTION, RESOLUTION, 3))
-        for x, z_4 in tqdm([*enumerate(Z_LADDER)], model_display):
+        for x, z_4 in tqdm([*enumerate(Z_LADDER)], expGroup.display_name):
             for y, z_5 in enumerate(Z_LADDER):
                 img = synth(model, LOC_ZERO, torch.Tensor([z_4, z_5]))
                 color = detectBallColor(img)
                 canvas[x, y, :] = color
         ax.imshow(canvas, extent=EXTENT)
-        ax.set_title(model_display)
+        ax.set_title(expGroup)
         ax.set_ylabel('$z_4$')
         ax.set_xlabel('$z_5$')
         hideTicks(ax)

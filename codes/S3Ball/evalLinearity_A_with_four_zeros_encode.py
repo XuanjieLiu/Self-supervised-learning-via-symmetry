@@ -4,14 +4,11 @@
 import torch
 from tqdm import tqdm
 
-from Continue_ColorfulBall_Rnn256_45dimColor.normal_rnn import Conv2dGruConv2d, BATCH_SIZE
-from Continue_ColorfulBall_Rnn256_45dimColor.train_config import CONFIG
 from ball_data_loader import BallDataLoader
 from shared import *
-from evalLinearity_A_with_four_zeros_shared import *
+from evalLinearity_shared import *
 
 DATASET_SIZE = 1024
-
 
 def data2z(dataset_path, exp_groups):
     dataLoader = BallDataLoader(
@@ -19,16 +16,7 @@ def data2z(dataset_path, exp_groups):
         True, 
     )
     for expGroup in tqdm(exp_groups):
-        config = {
-            **CONFIG, 
-            'latent_code_num': expGroup.n_latent_dims, 
-        }
-        model = Conv2dGruConv2d(config).to(DEVICE)
-        model.load_state_dict(torch.load(
-            expGroup.checkpoint_path, 
-            map_location=DEVICE,
-        ))
-        model.eval()
+        model = loadModel(expGroup)
         with open(expGroup.z_coords_map_path, 'w') as f:
             for batch, trajectory in dataLoader.IterWithPosition(BATCH_SIZE):
                 batch = batch.to(DEVICE)
@@ -54,4 +42,4 @@ def data2z(dataset_path, exp_groups):
 
 
 if __name__ == '__main__':
-    data2z('./Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/', EXP_GROUPS)
+    data2z('./Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/', QUANT_EXP_GROUPS)
