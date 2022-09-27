@@ -1,3 +1,7 @@
+import sys
+from os import path
+sys.path.append(path.join(path.dirname(path.abspath(__file__)), '../../'))
+
 import random
 from codes.common_utils import del_file
 import torch
