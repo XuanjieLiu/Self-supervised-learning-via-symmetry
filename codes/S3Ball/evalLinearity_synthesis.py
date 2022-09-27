@@ -47,9 +47,9 @@ def hideTicks(ax: Axes):
     )
 
 def plotNDims(n=3):
-    FIGSIZE = (11, 7)
+    FIGSIZE = (11, 2.2)
     NECK_LINE_X = .02
-    WIDTH_RATIOS = [.34, .02, .3, .02, .3]
+    WIDTH_RATIOS = [.33, .02, .3, .02, .3]
     LEN_Z_LADDER = 7
     assert LEN_Z_LADDER % 2 == 1  # to show z=0
     Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, LEN_Z_LADDER)
@@ -81,7 +81,7 @@ def plotNDims(n=3):
                     )
                     ax.yaxis.set_label_coords(-.4, .3)
                 if row_i == n - 1:
-                    if col_i % 2 == 0:
+                    if col_i % 3 == 0:
                         ax.set_xlabel(
                             '$%.1f$' % z_val, 
                         )
