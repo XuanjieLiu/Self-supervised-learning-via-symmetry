@@ -85,7 +85,10 @@ def plotNDims(n=3):
                         ax.set_xlabel(
                             '$%.1f$' % z_val, 
                         )
-        subfig.suptitle(expGroup.display_name)
+        subfig.suptitle(
+            '(' + 'abc'[expGroup_i] + ') ' 
+            + expGroup.display_name, 
+        )
         # neckLine = Line2D(
         #     [NECK_LINE_X], 
         #     [0, 1], 
