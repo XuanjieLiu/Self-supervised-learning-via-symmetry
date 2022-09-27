@@ -66,32 +66,15 @@ def getErr(X, Y) -> torch.Tensor:
     return Y - regression.predict(X)
 
 
-def getXZ(data: torch.Tensor):
-    return torch.cat((
-        data[:, 0].unsqueeze(1), 
-        data[:, 2].unsqueeze(1), 
-    ), dim=1)
-
-
 def calc_group_mse(expGroup):
     dataset = Dataset(expGroup.z_coords_map_path)
     X = dataset.X
     std = dataset.Y.std(dim=0)
     Y = dataset.Y / std
-    xz_err = getErr(
-        getXZ(X),
-        getXZ(Y),
-    )
-    x_mse = xz_err[:, 0].square().mean().item()
-    z_mse = xz_err[:, 1].square().mean().item()
-    xz_mse = xz_err.square().mean().item()
-    assert abs((x_mse + z_mse) * .5 - xz_mse) < 1e-5
-
-    y_err = getErr(
-        X[:, 1].unsqueeze(1),
-        Y[:, 1].unsqueeze(1),
-    )
-    y_mse = y_err.square().mean().item()
+    err = getErr(X, Y)
+    x_mse = err[:, 0].square().mean().item()
+    y_mse = err[:, 1].square().mean().item()
+    z_mse = err[:, 2].square().mean().item()
 
     xyz_mse = (x_mse + z_mse + y_mse) / 3
     return x_mse, y_mse, z_mse, xyz_mse
