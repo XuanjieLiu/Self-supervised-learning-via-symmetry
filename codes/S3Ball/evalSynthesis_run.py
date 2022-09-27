@@ -36,11 +36,12 @@ CHECKPOINT_PATHS_COLOR = [
     ('VAE',  './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
     ('AE 1', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_1_cp130000.pt'), 
     ('AE 2', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_2_cp150000.pt'), 
+    ('$\\beta$-VAE', './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_checkpoint_150000.pt'), 
 ]
 
 def main():
-    plotFiveDims()
-    # plotColor()
+    # plotFiveDims()
+    plotColor()
     # plotColorDisentangle(loadModel(CHECKPOINT_PATHS_BENCHMARK[0][1]))
 
 @lru_cache(3)
