@@ -6,7 +6,7 @@ from evalLinearity_shared import ExpGroup
 from typing import List
 
 
-CHECK_POINT_NUM_LIST = [i*10000 for i in range(4, 16)]
+CHECK_POINT_NUM_LIST = [i*10000 for i in range(2, 16)]
 SUB_EXP_LIST = [str(i) for i in range(1, 11)]
 DATASET_PATH = './Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/'
 BATCH_ROOT = "batch_exp/"
