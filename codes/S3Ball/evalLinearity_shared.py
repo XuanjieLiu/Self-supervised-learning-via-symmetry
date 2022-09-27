@@ -32,14 +32,14 @@ class ExpGroup:
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'
-eG.display_name = 'VAE+RNN, no Symmetry'
+eG.display_name = 'Ours, w/o Symmetry'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/vae_aug_0.txt'
 eG.n_latent_dims = 5
 ablat = eG
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'
-eG.display_name = 'VAE+RNN, with Symmetry'
+eG.display_name = 'Ours'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/vae_aug_4.txt'
 eG.n_latent_dims = 5
 ours = eG
