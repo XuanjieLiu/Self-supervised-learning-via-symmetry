@@ -201,7 +201,7 @@ if __name__ == "__main__":
     # img_np = img_tensor.numpy()
     # print(img_tensor[1].max().item())
 
-    check_path = 'Ball3DImg/same_color_Y_diff_zx_v2.0'
+    check_path = 'Ball3DImg/same_position_diff_color_v2.0'
     dc = BallDataLoader(check_path)
     dc.data_checker()
     dc.delete_traj_with_no_ball_imgs(is_delete=True)

@@ -6,6 +6,7 @@ class ExpGroup:
         self.display_name = None
         self.z_coords_map_path: str = None
         self.n_latent_dims = None
+        self.mse_result_path = None
 
 EXP_GROUPS: List[ExpGroup] = []
 

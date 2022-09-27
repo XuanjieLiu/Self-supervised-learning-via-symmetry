@@ -65,8 +65,8 @@ def verticalCalc(h, v, dt, g=GRAVITY):
 
 def ballNextState(sXYZ, vXYZ, dt, g=GRAVITY):
     nsX, nvX = uniformLinerCalc(sXYZ[0], vXYZ[0], dt)
-    # nsY, nvY = verticalCalc(sXYZ[1], vXYZ[1], dt, g)
-    nsY, nvY = zero_gravity(sXYZ[1], vXYZ[1], dt, g)
+    nsY, nvY = verticalCalc(sXYZ[1], vXYZ[1], dt, g)
+    # nsY, nvY = zero_gravity(sXYZ[1], vXYZ[1], dt, g)
     nsZ, nvZ = uniformLinerCalc(sXYZ[2], vXYZ[2], dt)
     return [nsX, nsY, nsZ], [nvX, nvY, nvZ]
 
