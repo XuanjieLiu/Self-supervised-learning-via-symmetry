@@ -105,7 +105,7 @@ class BallTrainer:
         else:
             print("New model is initialized")
 
-    def eval(self, epoch_num, iter_num, eval_loss_counter):
+    def eval(self, epoch_num, iter_num, eval_loss_counter, eval_record_path=None):
         print("=====================start eval=======================")
         eval_iter_num = self.eval_data_loader.get_iter_num_of_an_epoch(BATCH_SIZE)
         self.eval_data_loader.set_epoch_num(epoch_num)
@@ -147,7 +147,10 @@ class BallTrainer:
                                     data_shape[3] / data_shape[4]
         eval_loss_counter.add_values([vae_recon_loss_iter_mean, rnn_recon_loss_iter_mean,
                                       vae_recon_loss_pixel_mean, rnn_recon_loss_pixel_mean, rnn_z_loss])
-        eval_loss_counter.record_and_clear(self.eval_record_path, iter_num, round_idx=4)
+        eval_loss_counter.record_and_clear(
+            eval_record_path if eval_record_path is not None else self.eval_record_path,
+            iter_num, round_idx=4
+        )
         print("=====================end eval=======================")
 
     def scheduler_func(self, curr_iter):
