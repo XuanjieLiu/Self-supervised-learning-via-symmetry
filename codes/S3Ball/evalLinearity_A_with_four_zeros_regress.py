@@ -64,7 +64,7 @@ def getErr(X, Y) -> torch.Tensor:
 
 
 def getXZ(data: torch.Tensor):
-    return torch.concat((
+    return torch.cat((
         data[:, 0].unsqueeze(1), 
         data[:, 2].unsqueeze(1), 
     ), dim=1)

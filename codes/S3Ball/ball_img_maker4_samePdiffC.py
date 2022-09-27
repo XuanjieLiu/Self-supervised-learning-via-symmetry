@@ -16,7 +16,7 @@ WIN_W = 320
 WIN_H = 320
 IMG_W = 32
 IMG_H = 32
-DT = 0.2
+DT = 2
 TRAJ_LEN = 20
 BALL_INIT_POSITION = [0.0, 1.0, 0.0]
 IMG_FOLDER_PATH = 'Ball3DImg'
@@ -28,7 +28,7 @@ MODE_MAKE_IMG = 'make_img'
 MODE_LOCATE = 'locate'
 MODE_OBV_ONLY = 'obv_only'
 
-RUNNING_MODE = MODE_LOCATE
+RUNNING_MODE = MODE_MAKE_IMG
 
 
 """
@@ -71,13 +71,15 @@ def init_ball_color():
     sample_list = list(filter(lambda point: point[ENABLE], BALL_INITIAL_COLOR))
     color_range = random.sample(sample_list, 1)[0][COLOR3F]
     color = [random_in_range(r) for r in color_range]
-    print(color)
+    if color[0] < 0.5 and color[1] < 0.5 and color[2] < 0.5:
+        index = random.sample([0, 1, 2], 1)[0]
+        color[index] = random.random() / 2 + 0.5
     return color
 
 
 class BallViewer:
     def __init__(self):
-        self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'same_color_Y_diff_zx_v2.0')
+        self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'same_position_diff_color_v2.0')
         # self.img_save_path = os.path.join(IMG_FOLDER_PATH, f'{BALL_INITIAL_COLOR[0][NAME]}')
         # self.img_save_path = os.path.join(IMG_FOLDER_PATH, str(position))
         if RUNNING_MODE == MODE_MAKE_IMG:
@@ -244,18 +246,18 @@ class BallViewer:
             print(self.curr_idx)
             self.curr_idx += 1
         if self.curr_idx == TRAJ_LEN:
+            dt = random.sample([i*0.2 for i in range(0, 20)], 1)[0]
             self.curr_idx = 0
             self.sub_folder_dir = os.path.join(self.img_save_path, str(time.time()))
             os.mkdir(self.sub_folder_dir)
             init_s, init_v = init_ball_state()
-            self.color = init_ball_color()
             self.resetBallPosition(init_s)
+            [self.sX, self.sY, self.sZ], [self.vX, self.vY, self.vZ] = ballNextState([self.sX, self.sY, self.sZ], [self.vX, self.vY, self.vZ], dt)
+            self.color = init_ball_color()
             self.vX, self.vY, self.vZ = init_v
         self.last_position = [round(self.sX, 3), round(self.sY, 3), round(self.sZ, 3)]
         self.makeBall(self.sX, self.sY, self.sZ, self.color)
-
-        [self.sX, self.sY, self.sZ], [self.vX, self.vY, self.vZ] = ballNextState([self.sX, self.sY, self.sZ],
-                                                                                 [self.vX, self.vY, self.vZ], DT)
+        self.color = init_ball_color()
 
     def resetBallPosition(self, position=None):
         if position is None:

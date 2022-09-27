@@ -36,6 +36,7 @@ def add_checkpoint_to_exp_group_list(checkpoint_parDir, checkpoint_name, exp_gro
     eG.display_name = eG.checkpoint_path
     checkpoint_num = checkpoint_name.split('_')[-1].split('.')[0]
     eG.z_coords_map_path = os.path.join(checkpoint_parDir, f'z_coords_map_{checkpoint_num}.txt')
+    eG.mse_result_path = os.path.join(checkpoint_parDir, f'mse_result_{checkpoint_num}.txt')
     eG.n_latent_dims = 3
     exp_group_list.append(eG)
 
