@@ -49,15 +49,15 @@ def hideTicks(ax: Axes):
 def plotNDims(n=3):
     FIGSIZE = (11, 7)
     NECK_LINE_X = .02
-    HEIGHT_RATIOS = [.3, .02, .3, .02, .34]
-    LEN_Z_LADDER = 19
+    WIDTH_RATIOS = [.34, .02, .3, .02, .3]
+    LEN_Z_LADDER = 7
     assert LEN_Z_LADDER % 2 == 1  # to show z=0
     Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, LEN_Z_LADDER)
 
     fig = plt.figure(constrained_layout=True, figsize=FIGSIZE)
     N_SUBFIGS = len(VISUAL_EXP_GROUPS) * 2 - 1
     subfigs: List[SubFigure] = fig.subfigures(
-        N_SUBFIGS, 1, height_ratios=HEIGHT_RATIOS, 
+        1, N_SUBFIGS, width_ratios=WIDTH_RATIOS, 
     )
     for expGroup_i, subfig in enumerate(subfigs[0::2]):
         expGroup = VISUAL_EXP_GROUPS[expGroup_i]
@@ -74,15 +74,13 @@ def plotNDims(n=3):
                 img = synth(model, z)
                 ax.imshow(img, extent=EXTENT)
                 hideTicks(ax)
-                if col_i == 0:
+                if expGroup_i == 0 and col_i == 0:
                     ax.set_ylabel(
                         '$z_%d$' % (row_i + 1), 
                         rotation=0, 
                     )
                     ax.yaxis.set_label_coords(-.4, .3)
-                if expGroup_i == len(
-                    VISUAL_EXP_GROUPS
-                ) - 1 and row_i == n - 1:
+                if row_i == n - 1:
                     if col_i % 2 == 0:
                         ax.set_xlabel(
                             '$%.1f$' % z_val, 
