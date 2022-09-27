@@ -30,8 +30,7 @@ EXTENT = [-Z_RADIUS, Z_RADIUS, -Z_RADIUS, Z_RADIUS]
 CHECKPOINT_PATHS_BENCHMARK = [
     ('Ours', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
     ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'), 
-    ('Ours, w/o symmetry', './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'), 
-    # todo: beta vae
+    ('$\\beta$-VAE', './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_checkpoint_150000.pt'), 
 ]
 CHECKPOINT_PATHS_COLOR = [
     ('VAE',  './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'), 
@@ -98,7 +97,7 @@ def plotFiveDims():
                         '$z_%d$' % (col_i + 1), 
                     )
                 if subfig_i == 0 and col_i == 0:
-                    if row_i % 2 == 0:
+                    # if row_i % 2 == 0:
                         ax.set_ylabel(
                             '$%.1f$' % z_val, 
                             rotation=0, 
