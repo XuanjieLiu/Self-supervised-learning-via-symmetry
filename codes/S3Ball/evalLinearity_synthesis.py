@@ -35,7 +35,7 @@ RAINBOW_EXP_GROUPS: List[ExpGroup] = [
 def main():
     plotNDims(3)
     # plotColor()
-    # plotColorDisentangle(loadModel())
+    # plotColorDisentangle(loadModel(RAINBOW_EXP_GROUPS[0]))
 
 def hideTicks(ax: Axes):
     ax.tick_params(
@@ -61,7 +61,7 @@ def plotNDims(n=3):
     )
     for expGroup_i, subfig in enumerate(subfigs[0::2]):
         expGroup = VISUAL_EXP_GROUPS[expGroup_i]
-        model = loadModel(expGroup.checkpoint_path)
+        model = loadModel(expGroup)
         axeses: List[List[Axes]] = subfig.subplots(
             n, LEN_Z_LADDER, 
             sharex=True, sharey=True, 
@@ -69,7 +69,7 @@ def plotNDims(n=3):
         for row_i, axes in tqdm(enumerate(axeses), expGroup.display_name):
             for col_i, ax in enumerate(axes):
                 z_val = Z_LADDER[col_i]
-                z = torch.zeros((N_LATENT_DIM, ))
+                z = torch.zeros((expGroup.n_latent_dims, ))
                 z[row_i] = z_val
                 img = synth(model, z)
                 ax.imshow(img, extent=EXTENT)
@@ -130,7 +130,7 @@ def plotColor():
     for (expGroup, ax) in zip(
         RAINBOW_EXP_GROUPS, axes, 
     ):
-        model = loadModel(expGroup.checkpoint_path)
+        model = loadModel(expGroup)
         canvas = torch.zeros((RESOLUTION, RESOLUTION, 3))
         for x, z_4 in tqdm([*enumerate(Z_LADDER)], expGroup.display_name):
             for y, z_5 in enumerate(Z_LADDER):
