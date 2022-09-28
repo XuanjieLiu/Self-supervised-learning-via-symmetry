@@ -15,7 +15,7 @@ plt.rcParams.update({
 
 
 DATA_SIZE_ORDER = [256, 512, 1024, 2048]
-SYMM_ORDER = [0, 4, 16]
+SYMM_ORDER = [0, 1, 4, 16]
 
 
 class BatchExpResult:
@@ -130,11 +130,15 @@ def sub_boxplot_by_datasize(batch_result_list: List[BatchExpResult]):
 
 
 def sub_pointplot_by_datasize(batch_result_list: List[BatchExpResult]):
+    colors_order = ['blue', 'gold', 'chocolate', 'red']
     fig, axs = plt.subplots(1, 4, figsize=(5.5, 2))
     sort_brl = sort_batch_result_list_by_order_list(batch_result_list, DATA_SIZE_ORDER, SYMM_ORDER)
+    sub_exp_num = len(sort_brl[0].best_mse_list)
     def sup_plot():
         for i in range(4):
-            colors = [*['orange' for i in range(10)], *['blue' for i in range(20)]]
+            # colors = [*['orange' for i in range(sub_exp_num)], *['blue' for i in range(
+            #     (len(SYMM_ORDER)-1) * sub_exp_num)]]
+            colors = [colors_order[j] for j in range(len(SYMM_ORDER)) for i in range(sub_exp_num)]
             brs = sort_batch_result_list_by_order_list(sort_brl, [DATA_SIZE_ORDER[i]], SYMM_ORDER)
             x = [n for br in brs for n in br.best_mse_list]
             y = [n for br in brs for n in br.best_prior_recon_list]
