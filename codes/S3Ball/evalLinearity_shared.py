@@ -32,24 +32,31 @@ class ExpGroup:
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'
-eG.display_name = 'Ours, w/o Symmetry'
+eG.display_name = 'Ours w/o Symmetry'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/vae_aug_0.txt'
 eG.n_latent_dims = 5
 ablat = eG
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'
-eG.display_name = 'Ours'
+eG.display_name = 'SPS (Ours)'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/vae_aug_4.txt'
 eG.n_latent_dims = 5
 ours = eG
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_no_color_checkpoint_110000.pt'
-eG.display_name = '$\\beta$-VAE'
+eG.display_name = '$\\beta$-VAE (Baseline)'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/beta_vae.txt'
 eG.n_latent_dims = 3
 beta_vae = eG
+
+eG = ExpGroup()
+eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_checkpoint_correct.pt'
+eG.display_name = '$\\beta$-VAE (Baseline)'
+eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/beta_vae_color.txt'
+eG.n_latent_dims = 5
+beta_vae_color = eG
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_1_cp130000.pt'
@@ -66,10 +73,10 @@ eG.n_latent_dims = 5
 ae_2 = eG
 
 QUANT_EXP_GROUPS: List[ExpGroup] = [
-    ours, ablat, beta_vae, 
+    beta_vae, ablat, ours, 
     # ae_1, ae_2, 
 ]
 
 VISUAL_EXP_GROUPS: List[ExpGroup] = [
-    ours, ablat, beta_vae, 
+    beta_vae, ablat, ours, 
 ]
