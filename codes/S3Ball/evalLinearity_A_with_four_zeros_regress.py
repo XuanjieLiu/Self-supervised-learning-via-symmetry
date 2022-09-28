@@ -112,7 +112,8 @@ def main():
     
     sIO = StringIO()
     print(r'\begin{center}', file=sIO)
-    print(r'\begin{tabular}{l|cccc}', file=sIO)
+    print(r'\begin{tabular}{lcccc}', file=sIO)
+    print(r'\toprule', file=sIO)
 
     print('Method ', end='', file=sIO)
     for dim in 'xyz':
@@ -122,7 +123,7 @@ def main():
         # )
         print('& $', dim, '$ axis MSE $\downarrow$ ', sep='', end='', file=sIO)
     print('& MSE $\downarrow$ ', file=sIO)
-    print(r'\\ \hline', file=sIO)
+    print(r'\\ \midrule', file=sIO)
 
     for row_i, expGroup in enumerate(QUANT_EXP_GROUPS):
         print(expGroup.display_name, end='', file=sIO)
@@ -131,6 +132,7 @@ def main():
         if row_i < 2:
             print(r'\\ ', file=sIO)
     
+    print(r'\bottomrule', file=sIO)
     print(r'\end{tabular}', file=sIO)
     print(r'\end{center}', file=sIO)
 
