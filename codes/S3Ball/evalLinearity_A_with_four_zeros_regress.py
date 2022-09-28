@@ -112,7 +112,7 @@ def main():
         print(expGroup.display_name, end='', file=sIO)
         for col in cols:
             print('&', col[row_i], '', end='', file=sIO)
-        if row_i < 2:
+        if row_i < 2 or True:
             print(r'\\ ', file=sIO)
     
     print(r'\bottomrule', file=sIO)
