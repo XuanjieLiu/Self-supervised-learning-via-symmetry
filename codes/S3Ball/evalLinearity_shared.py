@@ -60,7 +60,7 @@ beta_vae_color = eG
 
 eG = ExpGroup()
 eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_AE_1_cp130000.pt'
-eG.display_name = 'AE+RNN 1, with Symmetry'
+eG.display_name = 'SPS-AE'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/ae_aug_4_1.txt'
 eG.n_latent_dims = 5
 ae_1 = eG
@@ -72,9 +72,14 @@ eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/ae_aug_4_
 eG.n_latent_dims = 5
 ae_2 = eG
 
+# QUANT_EXP_GROUPS: List[ExpGroup] = [
+#     beta_vae, ablat, ours, 
+# ]
+
+# vae vs ae
+ours.display_name = 'SPS-VAE'
 QUANT_EXP_GROUPS: List[ExpGroup] = [
-    beta_vae, ablat, ours, 
-    # ae_1, ae_2, 
+    ours, ae_1, 
 ]
 
 VISUAL_EXP_GROUPS: List[ExpGroup] = [
