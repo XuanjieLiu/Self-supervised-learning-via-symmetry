@@ -72,15 +72,17 @@ eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/ae_aug_4_
 eG.n_latent_dims = 5
 ae_2 = eG
 
-# QUANT_EXP_GROUPS: List[ExpGroup] = [
-#     beta_vae, ablat, ours, 
-# ]
-
-# vae vs ae
-ours.display_name = 'SPS-VAE'
-QUANT_EXP_GROUPS: List[ExpGroup] = [
-    ours, ae_1, 
-]
+if True:
+    # normal
+    QUANT_EXP_GROUPS: List[ExpGroup] = [
+        beta_vae, ablat, ours, 
+    ]
+else:
+    # vae vs ae
+    ours.display_name = 'SPS-VAE'
+    QUANT_EXP_GROUPS: List[ExpGroup] = [
+        ae_1, ours, 
+    ]
 
 VISUAL_EXP_GROUPS: List[ExpGroup] = [
     beta_vae, ablat, ours, 

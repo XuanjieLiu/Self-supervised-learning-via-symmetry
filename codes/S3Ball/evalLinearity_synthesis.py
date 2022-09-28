@@ -35,10 +35,9 @@ RAINBOW_EXP_GROUPS: List[ExpGroup] = [
 ]
 
 def main():
-    plotNDims(3)
+    # plotNDims(3)
     # plotColor()
-    # plotColorDisentangle(loadModel(ours))
-    # plotColorDisentangle(loadModel(beta_vae_color))
+    plotColorDisentangle([ours, beta_vae_color])
 
 def hideTicks(ax: Axes):
     ax.tick_params(
@@ -157,7 +156,8 @@ def plotColor():
     fig.suptitle('Detected color of the synthesized ball')
     plt.show()
 
-def plotColorDisentangle(model):
+def plotColorDisentangle(expGroups: List[ExpGroup]):
+    # RESOLUTION = 2
     # RESOLUTION = 20
     # RESOLUTION = 64
     RESOLUTION = 128
@@ -165,50 +165,59 @@ def plotColorDisentangle(model):
     Z_LADDER = torch.linspace(-Z_RADIUS, Z_RADIUS, RESOLUTION)
     CROSS_RADIUS = 1
     # CROSS_RADIUS = .5
+    FIGSIZE = (10, 5)
+    WIDTH_RATIOS = [.4, .01, .4]
 
-    fig = plt.figure(figsize=(5, 5))
-    axeses = fig.subplots(
-        3, 3, 
-        # sharex=True, sharey=True, 
+    fig = plt.figure(constrained_layout=True, figsize=FIGSIZE)
+    subfigs: List[SubFigure] = fig.subfigures(
+        1, 3, width_ratios=WIDTH_RATIOS, 
     )
-    SUBPLOT_PAD = .65
-    fig.subplots_adjust(wspace=SUBPLOT_PAD, hspace=SUBPLOT_PAD)
-    midAx = axeses[1][1]
-    for row_i, axes in enumerate(axeses):
-        for col_i, ax in enumerate(axes):
-            default_z = torch.zeros((5, ))
-            if ax is midAx:
-                i, j = 3, 4
-            else:
-                i, j = 0, 2
-                default_z[3] = (1 - row_i) * CROSS_RADIUS
-                default_z[4] = (col_i - 1) * CROSS_RADIUS
-            canvas = torch.zeros((RESOLUTION, RESOLUTION, 3))
-            for x, z_i in tqdm(
-                [*enumerate(Z_LADDER)], 
-                f'({row_i}, {col_i}) / (3, 3)', 
-            ):
-                for y, z_j in enumerate(Z_LADDER):
-                    z = default_z[:]
-                    z[i] = z_i
-                    z[j] = z_j
-                    img = synth(model, z)
-                    color = detectBallColor(img)
-                    canvas[x, y, :] = color
-            ax.imshow(canvas, extent=EXTENT, origin='lower')
-            if ax is not midAx:
-                drawCross(ax, 0, 0)
-                drawCross(midAx, default_z[3], default_z[4])
-            # ax.set_title('')
-            ax.set_ylabel(
-                '$z_%d$' % (i + 1), rotation=0, 
-                labelpad=10, 
-            )
-            ax.set_xlabel('$z_%d$' % (j + 1))
-            hideTicks(ax)
+    for expGroup, subfig in zip(expGroups, subfigs[::2]):
+        model = loadModel(expGroup)
+        subfig.suptitle(expGroup.display_name)
+        axeses = subfig.subplots(
+            3, 3, 
+            # sharex=True, sharey=True, 
+        )
+        SUBPLOT_PAD = .65
+        midAx = axeses[1][1]
+        for row_i, axes in enumerate(axeses):
+            for col_i, ax in enumerate(axes):
+                default_z = torch.zeros((5, ))
+                if ax is midAx:
+                    i, j = 3, 4
+                else:
+                    i, j = 0, 2
+                    default_z[3] = (1 - row_i) * CROSS_RADIUS
+                    default_z[4] = (col_i - 1) * CROSS_RADIUS
+                canvas = torch.zeros((RESOLUTION, RESOLUTION, 3))
+                for x, z_i in tqdm(
+                    [*enumerate(Z_LADDER)], 
+                    f'({row_i}, {col_i}) / (3, 3)', 
+                ):
+                    for y, z_j in enumerate(Z_LADDER):
+                        z = default_z[:]
+                        z[i] = z_i
+                        z[j] = z_j
+                        img = synth(model, z)
+                        color = detectBallColor(img)
+                        canvas[x, y, :] = color
+                ax.imshow(canvas, extent=EXTENT, origin='lower')
+                if ax is not midAx:
+                    drawCross(ax, 0, 0)
+                    drawCross(midAx, default_z[3], default_z[4])
+                # ax.set_title('')
+                ax.set_ylabel(
+                    '$z_%d$' % (i + 1), rotation=0, 
+                    labelpad=9, 
+                )
+                ax.set_xlabel(
+                    '$z_%d$\n\\vphantom{0}' % (j + 1), 
+                    labelpad=13, 
+                )
+                hideTicks(ax)
 
     # fig.suptitle('Detected color of the synthesized ball')
-    plt.tight_layout()
     plt.show()
 
 def drawCross(ax: Axes, x, y, c='k', radius=.15):
