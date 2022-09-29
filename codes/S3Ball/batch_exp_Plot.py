@@ -15,7 +15,7 @@ plt.rcParams.update({
 
 
 DATA_SIZE_ORDER = [256, 512, 1024, 2048]
-SYMM_ORDER = [0, 1, 4, 16]
+SYMM_ORDER = [0, 4, 16]
 
 
 class BatchExpResult:
@@ -111,18 +111,18 @@ def plot_box_rnn_recon(batch_result_list: List[BatchExpResult]):
 
 
 def sub_boxplot_by_datasize(batch_result_list: List[BatchExpResult]):
-    fig, axs = plt.subplots(1, 4, figsize=(5.5, 2))
+    fig, axs = plt.subplots(1, 4, figsize=(5.5, 2), sharey='all')
 
     def sup_plot():
         for i in range(4):
             brs = sort_batch_result_list_by_order_list(batch_result_list, [DATA_SIZE_ORDER[i]], SYMM_ORDER)
             axs[i].boxplot([br.best_mse_list for br in brs], showfliers=False)
-            axs[i].set_title(f'Data size {DATA_SIZE_ORDER[i]}')
+            axs[i].set_title(f'{DATA_SIZE_ORDER[i]} Samples')
             axs[i].set_xticklabels([f'{br.symm}' for br in brs])
     sup_plot()
 
     for ax in axs.flat:
-        ax.set(ylabel='MSE', xlabel='K')
+        ax.set(ylabel='Linear proj. loss', xlabel='K')
     for ax in axs.flat:
         ax.label_outer()
 
@@ -131,22 +131,24 @@ def sub_boxplot_by_datasize(batch_result_list: List[BatchExpResult]):
 
 def sub_pointplot_by_datasize(batch_result_list: List[BatchExpResult]):
     colors_order = ['blue', 'gold', 'chocolate', 'red']
-    fig, axs = plt.subplots(1, 4, figsize=(5.5, 2))
+    fig, axs = plt.subplots(1, 4, figsize=(5.5, 2), sharey='all', sharex='all')
     sort_brl = sort_batch_result_list_by_order_list(batch_result_list, DATA_SIZE_ORDER, SYMM_ORDER)
     sub_exp_num = len(sort_brl[0].best_mse_list)
+    scatter_handler = None
     def sup_plot():
-        for i in range(4):
-            # colors = [*['orange' for i in range(sub_exp_num)], *['blue' for i in range(
-            #     (len(SYMM_ORDER)-1) * sub_exp_num)]]
-            colors = [colors_order[j] for j in range(len(SYMM_ORDER)) for i in range(sub_exp_num)]
-            brs = sort_batch_result_list_by_order_list(sort_brl, [DATA_SIZE_ORDER[i]], SYMM_ORDER)
-            x = [n for br in brs for n in br.best_mse_list]
-            y = [n for br in brs for n in br.best_prior_recon_list]
-            axs[i].scatter(x, y, c=colors)
-            axs[i].set_title(f'Data size {DATA_SIZE_ORDER[i]}', pad=10)
+        nonlocal scatter_handler
+        for i in range(len(DATA_SIZE_ORDER)):
+            # colors = [colors_order[j] for j in range(len(SYMM_ORDER)) for i in range(sub_exp_num)]
+            for j in range(len(SYMM_ORDER)):
+                opt_br = list(filter(lambda b: b.symm == SYMM_ORDER[j] and b.datasize == DATA_SIZE_ORDER[i], sort_brl))[0]
+                x = [n for n in opt_br.best_mse_list]
+                y = [n for n in opt_br.best_prior_recon_list]
+                scatter_handler = axs[i].scatter(x, y, c=colors_order[j], label=f"$K={SYMM_ORDER[j]}$", s=2)
+            axs[i].set_title(f'{DATA_SIZE_ORDER[i]} samples', pad=10)
     sup_plot()
+    axs[-1].legend()
     for ax in axs.flat:
-        ax.set(ylabel='Prior BCE', xlabel='MSE')
+        ax.set(ylabel='Loss on $\hat{\\textbf{x}}$', xlabel='Linear proj. loss')
     for ax in axs.flat:
         ax.label_outer()
 
@@ -154,7 +156,7 @@ def sub_pointplot_by_datasize(batch_result_list: List[BatchExpResult]):
 
 
 
-def sort_batch_result_list_by_order_list(batch_result_list: List[BatchExpResult], datasize_order, symm_order):
+def sort_batch_result_list_by_order_list(batch_result_list: List[BatchExpResult], datasize_order, symm_order) -> List[BatchExpResult]:
     sorted_list = []
     for ds in datasize_order:
         for sy in symm_order:
