@@ -13,7 +13,7 @@ IMG_PATH = 'vae3DBallEval_ImgBuffer'
 IGM_NAME = IMG_PATH + "/test.png"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-MODEL_PATH = 'blueStd_1_cp80000.pt'
+MODEL_PATH = 'RealBlueStd_1_100000.pt'
 
 
 def init_img_path():

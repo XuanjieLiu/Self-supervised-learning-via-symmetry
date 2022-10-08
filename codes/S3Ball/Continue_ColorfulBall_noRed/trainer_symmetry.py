@@ -161,7 +161,7 @@ class BallTrainer:
         create_results_path_if_not_exist(self.train_result_path)
         self.model.train()
         self.resume()
-        train_loss_counter = LossCounter(['loss_ED', 'loss_ERnnD', 'loss_Rnn',
+        train_loss_counter = LossCounter(['loss_ED',
                                           'loss_std_TRnnTr_rnn', 'loss_std_RRnnRr_rnn',
                                           'loss_TRnnTr_z1', 'loss_RRnnRr_z1',
                                           'loss_TRnnTrD_x1', 'loss_RRnnRrD_x1',
@@ -183,7 +183,6 @@ class BallTrainer:
             is_eval = i % self.eval_interval == 0
             epoch_num = new_epoch_num
             optimizer.zero_grad()
-            I_sample_points = self.gen_sample_points(self.base_len, data.size(1), i, self.enable_sample)
             T_sample_points = self.gen_sample_points(self.base_len, data.size(1), i, self.enable_sample)
             R_sample_points = self.gen_sample_points(self.base_len, data.size(1), i, self.enable_sample)
             z_gt, mu, logvar = self.model.batch_seq_encode_to_z(data)
@@ -194,9 +193,7 @@ class BallTrainer:
             T, Tr = make_translation_batch(batch_size=BATCH_SIZE * self.t_batch_multiple, t_range=self.t_range)
             R, Rr, theta = make_rotation_Y_batch(batch_size=BATCH_SIZE * self.r_batch_multiple,
                                                  angel_range=self.r_range)
-            #z0_rnn = self.model.predict_with_symmetry(z_gt_s, I_sample_points, lambda z: z)
             vae_loss = self.calc_vae_loss(data, z_combine, mu, logvar, recon_list)
-            rnn_loss = torch.zeros(2)
             T_z_loss = self.batch_symm_z_loss(
                 z_gt_s, T_sample_points, self.t_batch_multiple,
                 lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr)
@@ -213,7 +210,7 @@ class BallTrainer:
                 data[:, 1:, :, :, :], z_gt_s,
                 R_sample_points, self.t_batch_multiple, z_gt_cr[:, :-1, :],
                 lambda z: symm_rotaY(z, R), lambda z: symm_rotaY(z, Rr)) if self.enable_SRSD else torch.zeros(1)
-            loss = self.loss_func(vae_loss, rnn_loss, T_z_loss, R_z_loss, T_recon_loss, R_recon_loss, train_loss_counter)
+            loss = self.loss_func(vae_loss, T_z_loss, R_z_loss, T_recon_loss, R_recon_loss, train_loss_counter)
             loss.backward()
             optimizer.step()
             scheduler.step()
@@ -234,7 +231,7 @@ class BallTrainer:
         z0_S_rnn_Sr = do_seq_symmetry(z0_S_rnn, symm_reverse_func)
         z1 = z_gt_repeat[:, 1:, :]
         zloss_S_rnn_Sr__z1 = self.z1_symm_l2_loss_scalar * self.mse_loss(z0_S_rnn_Sr, z1)
-        std_d0 = torch.std(z0_S_rnn_Sr, dim=0)
+        std_d0 = torch.std(z0_S_rnn_Sr.reshape(symm_batch_multiple, BATCH_SIZE, z0_S_rnn.size(1), z0_S_rnn.size(2)), dim=0)
         std_sum = torch.sum(std_d0) * self.z_symm_std_loss_scalar
         return std_sum / symm_batch_multiple, zloss_S_rnn_Sr__z1 / symm_batch_multiple
 
@@ -264,21 +261,19 @@ class BallTrainer:
         symm_recon_loss = nn.BCELoss(reduction='sum')(z0_S_rnn_Sr_D, x1_rp) / symm_recon_batch_multiple
         return symm_recon_loss
 
-    def loss_func(self, vae_loss, rnn_loss, T_loss, R_loss, T_recon_loss, R_recon_loss, loss_counter):
+    def loss_func(self, vae_loss, T_loss, R_loss, T_recon_loss, R_recon_loss, loss_counter):
         xloss_ED, KLD = vae_loss
-        xloss_ERnnD, zloss_Rnn = rnn_loss
         zloss_T_rnn_Tr__rnn, zloss_T_rnn_Tr__z1 = T_loss
         zloss_R_rnn_Rr__rnn, zloss_R_rnn_Rr__z1 = R_loss
 
         loss = 0
         loss += xloss_ED + KLD
-        # loss += zloss_Rnn
         loss += zloss_T_rnn_Tr__z1 + zloss_R_rnn_Rr__z1
         loss += T_recon_loss + R_recon_loss
         if self.enable_SRS:
             loss += zloss_T_rnn_Tr__rnn + zloss_R_rnn_Rr__rnn
 
-        loss_counter.add_values([xloss_ED.item(), xloss_ERnnD.item(), zloss_Rnn.item(),
+        loss_counter.add_values([xloss_ED.item(),
                                  zloss_T_rnn_Tr__rnn.item(), zloss_R_rnn_Rr__rnn.item(),
                                  zloss_T_rnn_Tr__z1.item(), zloss_R_rnn_Rr__z1.item(),
                                  T_recon_loss.item(), R_recon_loss.item(),
