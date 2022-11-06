@@ -207,8 +207,8 @@ class BallTrainer:
                     lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr), 
                 )
             else:
-                T_z_loss = torch.zeros(2)
-                T_recon_loss = torch.zeros(1)
+                T_z_loss = torch.zeros(2, device=DEVICE)
+                T_recon_loss = torch.zeros(1, device=DEVICE)
             if self.enable_SRSD and self.r_batch_multiple:
                 R_z_loss = self.batch_symm_z_loss(
                     z_rpm, z0_rnn, R_sample_points, self.r_batch_multiple,
@@ -220,8 +220,8 @@ class BallTrainer:
                     lambda z: symm_rota(z, R), lambda z: symm_rota(z, Rr), 
                 )
             else:
-                R_z_loss = torch.zeros(2)
-                R_recon_loss = torch.zeros(1)
+                R_z_loss = torch.zeros(2, device=DEVICE)
+                R_recon_loss = torch.zeros(1, device=DEVICE)
             loss = self.loss_func(vae_loss, rnn_loss, T_z_loss, R_z_loss, T_recon_loss, R_recon_loss, train_loss_counter)
             loss.backward()
             optimizer.step()
