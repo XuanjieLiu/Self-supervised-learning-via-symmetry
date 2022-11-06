@@ -51,7 +51,7 @@ class BallDataLoader:
         self.data_path = data_path
         if not os.path.isdir(data_path):
             print('cannot find dataset:', data_path)
-            print('we are now at', os.getcwd())
+            print('we are now at', os.getcwd(), flush=True)
             raise FileNotFoundError
         self.f_list = os.listdir(data_path)  # 返回文件名
         random.shuffle(self.f_list)

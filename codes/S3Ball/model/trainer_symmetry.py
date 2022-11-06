@@ -26,10 +26,10 @@ def is_need_train(train_config):
     loss_counter = LossCounter([])
     iter_num = loss_counter.load_iter_num(train_config['train_record_path'])
     if train_config['max_iter_num'] > iter_num:
-        print("Continue training")
+        print("Continue training", flush=True)
         return True
     else:
-        print("No more training is needed")
+        print("No more training is needed", flush=True)
         return False
 
 
@@ -101,14 +101,14 @@ class BallTrainer:
     def resume(self):
         if os.path.exists(self.model_path):
             self.model.load_state_dict(self.model.load_tensor(self.model_path))
-            print(f"Model is loaded")
+            print(f"Model is loaded", flush=True)
         else:
-            print("New model is initialized")
+            print("New model is initialized", flush=True)
 
 
 
     def eval(self, epoch_num, iter_num, eval_loss_counter):
-        print("=====================start eval=======================")
+        print("=====================start eval=======================", flush=True)
         eval_iter_num = self.eval_data_loader.get_iter_num_of_an_epoch(BATCH_SIZE)
         self.eval_data_loader.set_epoch_num(epoch_num)
         self.model.eval()
@@ -119,7 +119,7 @@ class BallTrainer:
         data_shape = None
         for i in range(eval_iter_num):
             data, epoch, progress = self.eval_data_loader.load_a_batch_from_an_epoch(BATCH_SIZE)
-            print(progress)
+            print(progress, flush=True)
             data = data.to(DEVICE)
             data_shape = data.size()
             z_rp, mu, logvar = self.model.batch_seq_encode_to_z(data)
@@ -146,7 +146,7 @@ class BallTrainer:
         eval_loss_counter.add_values([vae_recon_loss_iter_mean, rnn_recon_loss_iter_mean,
                                       vae_recon_loss_pixel_mean, rnn_recon_loss_pixel_mean, rnn_z_loss])
         eval_loss_counter.record_and_clear(self.eval_record_path, iter_num, round_idx=4)
-        print("=====================end eval=======================")
+        print("=====================end eval=======================", flush=True)
 
     def scheduler_func(self, curr_iter):
         return self.scheduler_base_num ** curr_iter
@@ -170,7 +170,7 @@ class BallTrainer:
         for i in range(iter_num, self.max_iter_num):
             curr_iter = iter_num
             data, new_epoch_num, progress = self.train_data_loader.load_a_batch_from_an_epoch(BATCH_SIZE)
-            print(f'i={i}, epoch {epoch_num}, {progress * 100}%')
+            print(f'i={i}, epoch {epoch_num}, {progress * 100}%', flush=True)
             data = data.to(DEVICE)
             is_log = (i % self.log_interval == 0 and i != 0)
             recon_list = [data[:, 1:, ...]] if is_log and self.is_save_img else None
@@ -225,7 +225,7 @@ class BallTrainer:
 
             if is_log:
                 self.model.save_tensor(self.model.state_dict(), self.model_path)
-                print(train_loss_counter.make_record(i))
+                print(train_loss_counter.make_record(i), flush=True)
                 train_loss_counter.record_and_clear(self.train_record_path, i)
                 # self.save_result_imgs(recon_list, f'{i}_{str(I_sample_points)}', z_rpm.size(1) - 1)
             if is_eval:
