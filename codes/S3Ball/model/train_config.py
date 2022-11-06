@@ -2,6 +2,7 @@ import math
 
 CONFIG = {
     'train_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_subset_2048/',
+    'eval_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/',
     'latent_code_num': 3,
     't_batch_multiple': 4,
     'r_batch_multiple': 4,
@@ -13,7 +14,6 @@ CONFIG = {
     'r_n_dims': 2, 
     'rnn_num_layers': 1,
     'rnn_hidden_size': 256,
-    'eval_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/',
     'model_path': 'Conv2dGruConv2d_symmetry.pt',
     'kld_loss_scalar': 0.01,
     'enable_SRS': True,

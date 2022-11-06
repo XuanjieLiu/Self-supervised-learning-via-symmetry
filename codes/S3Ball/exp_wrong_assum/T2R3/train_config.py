@@ -13,7 +13,7 @@ CONFIG = {
     'r_n_dims': 3, 
     'rnn_num_layers': 1,
     'rnn_hidden_size': 256,
-    'eval_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/',
+    'eval_data_path': '../../Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/',
     'model_path': 'Conv2dGruConv2d_symmetry.pt',
     'kld_loss_scalar': 0.01,
     'enable_SRS': True,
