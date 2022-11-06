@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm ./*.err
+rm ./*.out
+rm ./auto.sbatch
