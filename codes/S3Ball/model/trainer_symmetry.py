@@ -167,10 +167,11 @@ class BallTrainer:
         curr_iter = iter_num
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: self.scheduler_func(curr_iter))
+        print(f'epoch', epoch_num, flush=True)
         for i in range(iter_num, self.max_iter_num):
             curr_iter = iter_num
             data, new_epoch_num, progress = self.train_data_loader.load_a_batch_from_an_epoch(BATCH_SIZE)
-            print(f'i={i}, epoch {epoch_num}, {progress * 100}%', flush=True)
+            # print(f'i={i}, epoch {epoch_num}, {progress * 100}%', flush=True)
             data = data.to(DEVICE)
             is_log = (i % self.log_interval == 0 and i != 0)
             recon_list = [data[:, 1:, ...]] if is_log and self.is_save_img else None
