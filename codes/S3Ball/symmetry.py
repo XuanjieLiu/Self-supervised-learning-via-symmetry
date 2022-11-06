@@ -80,8 +80,8 @@ def make_rotation_batch(
         unrotates.append(unrotate.unsqueeze(0).repeat(
             batch_size, 1, 1, 
         ))
-    rotates   = torch.stack(rotates,   dim=0)
-    unrotates = torch.stack(unrotates, dim=0)
+    rotates   = torch.cat(rotates,   dim=0)
+    unrotates = torch.cat(unrotates, dim=0)
     return rotates, unrotates
 
 def make_rotation_Y_batch(batch_size, angel_range=(-0.25 * math.pi, 0.25 * math.pi)):
