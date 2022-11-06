@@ -196,28 +196,32 @@ class BallTrainer:
             z0_rnn = self.model.predict_with_symmetry(z_rpm, I_sample_points, lambda z: z)
             vae_loss = self.calc_vae_loss(data, z_rpm, mu, logvar, recon_list)
             rnn_loss = self.calc_rnn_loss(data[:, 1:, :, :, :], z_rpm, z0_rnn, recon_list)
-            if self.t_batch_multiple:
+            if self.enable_SRSD and self.t_batch_multiple:
                 T_z_loss = self.batch_symm_z_loss(
                     z_rpm, z0_rnn, T_sample_points, self.t_batch_multiple,
                     lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr)
                 )
+                T_recon_loss = self.batch_symm_recon_loss(
+                    data[:, 1:, :, :, :], z_rpm,
+                    T_sample_points, self.t_recon_batch_multiple,
+                    lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr), 
+                )
             else:
                 T_z_loss = torch.zeros(2)
-            if self.r_batch_multiple:
+                T_recon_loss = torch.zeros(1)
+            if self.enable_SRSD and self.r_batch_multiple:
                 R_z_loss = self.batch_symm_z_loss(
                     z_rpm, z0_rnn, R_sample_points, self.r_batch_multiple,
                     lambda z: symm_rota(z, R), lambda z: symm_rota(z, Rr)
                 )
+                R_recon_loss = self.batch_symm_recon_loss(
+                    data[:, 1:, :, :, :], z_rpm,
+                    R_sample_points, self.r_recon_batch_multiple,
+                    lambda z: symm_rota(z, R), lambda z: symm_rota(z, Rr), 
+                )
             else:
                 R_z_loss = torch.zeros(2)
-            T_recon_loss = self.batch_symm_recon_loss(
-                data[:, 1:, :, :, :], z_rpm,
-                T_sample_points, self.t_recon_batch_multiple,
-                lambda z: symm_trans(z, T), lambda z: symm_trans(z, Tr)) if self.enable_SRSD else torch.zeros(1)
-            R_recon_loss = self.batch_symm_recon_loss(
-                data[:, 1:, :, :, :], z_rpm,
-                R_sample_points, self.r_recon_batch_multiple,
-                lambda z: symm_rota(z, R), lambda z: symm_rota(z, Rr)) if self.enable_SRSD else torch.zeros(1)
+                R_recon_loss = torch.zeros(1)
             loss = self.loss_func(vae_loss, rnn_loss, T_z_loss, R_z_loss, T_recon_loss, R_recon_loss, train_loss_counter)
             loss.backward()
             optimizer.step()
