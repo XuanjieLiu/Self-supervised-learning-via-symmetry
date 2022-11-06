@@ -9,7 +9,7 @@ CONFIG = {
     'r_recon_batch_multiple': 4,
     't_range': (-1, 1),
     'r_range': (-math.pi, math.pi),
-    't_n_dims': 2, 
+    't_n_dims': 3, 
     'r_n_dims': 2, 
     'rnn_num_layers': 1,
     'rnn_hidden_size': 256,

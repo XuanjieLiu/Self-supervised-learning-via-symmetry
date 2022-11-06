@@ -1,6 +1,7 @@
 import numpy as np
 import os
 
+
 class LossCounter:
     def __init__(self, name_list):
         self.name_list = name_list
@@ -35,6 +36,7 @@ class LossCounter:
             f = open(record_path, "r")
             lines = f.readlines()
             t_list = [int(a.split('-')[0]) for a in lines]
+            f.close()
             return t_list[-1] + 1
         else:
             return 0

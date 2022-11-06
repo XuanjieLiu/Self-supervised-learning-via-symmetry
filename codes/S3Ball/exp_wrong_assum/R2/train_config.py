@@ -1,12 +1,16 @@
 import math
 
 CONFIG = {
-    'train_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue/',
-    'latent_code_num': 5,
-    't_batch_multiple': 4,
+    'train_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_subset_2048/',
+    'latent_code_num': 3,
+    't_batch_multiple': 0,
     'r_batch_multiple': 4,
+    't_recon_batch_multiple': 0,
+    'r_recon_batch_multiple': 4,
     't_range': (-1, 1),
     'r_range': (-math.pi, math.pi),
+    't_n_dims': None, 
+    'r_n_dims': 2, 
     'rnn_num_layers': 1,
     'rnn_hidden_size': 256,
     'eval_data_path': '../Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/',

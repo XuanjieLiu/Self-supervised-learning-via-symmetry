@@ -1,10 +1,18 @@
-import random
-from codes.common_utils import del_file
-import torch
-import numpy as np
 import os
+from os import path
+import sys
+import random
+
+import torch
 from PIL import Image
 from torchvision import transforms
+
+temp_dir = path.abspath(path.join(
+    path.dirname(__file__), '..', 
+))
+sys.path.append(temp_dir)
+from common_utils import del_file
+assert sys.path.pop(-1) == temp_dir
 
 
 def load_a_img_seq_with_position_from_disk(seq_path):
@@ -143,9 +151,25 @@ class BallDataLoader:
             position_batch.append(position)
         return torch.stack(img_batch, dim=0).cuda(), torch.stack(position_batch, dim=0).cuda()
 
+    def IterWithPosition(self, batch_size):
+        assert len(self.f_list) % batch_size == 0
+        for i in range(0, len(self.f_list), batch_size):
+            f_list = self.f_list[i : i + batch_size]
+            img_batch = []
+            position_batch = []
+            for filename in f_list:
+                seq_path = os.path.join(self.data_path, filename)
+                img, position = self.load_a_img_seq_with_position(seq_path)
+                img_batch.append(img)
+                position_batch.append(position)
+            yield (
+                torch.stack(img_batch, dim=0), 
+                torch.stack(position_batch, dim=0), 
+            )
+
     def data_checker(self):
         for i in self.f_list:
-            sub_folder = self.data_path + i
+            sub_folder = os.path.join(self.data_path, str(i))
             img_seq = os.listdir(sub_folder)
             if len(img_seq) < 20:
                 print(i)
@@ -154,7 +178,7 @@ class BallDataLoader:
         transform = transforms.Compose([transforms.ToTensor()])
         bad_traj_num = 0
         for i in self.f_list:
-            sub_folder = self.data_path + i
+            sub_folder = os.path.join(self.data_path, str(i))
             img_seq = os.listdir(sub_folder)
             for j in img_seq:
                 img = Image.open(sub_folder + '/' + j).convert('RGB')
@@ -185,7 +209,7 @@ if __name__ == "__main__":
     # img_np = img_tensor.numpy()
     # print(img_tensor[1].max().item())
 
-    check_path = 'Ball3DImg/32_32_0.2_20_3_init_points_colorful_continue_evalset/'
+    check_path = 'Ball3DImg/same_position_diff_color_v2.0'
     dc = BallDataLoader(check_path)
     dc.data_checker()
     dc.delete_traj_with_no_ball_imgs(is_delete=True)

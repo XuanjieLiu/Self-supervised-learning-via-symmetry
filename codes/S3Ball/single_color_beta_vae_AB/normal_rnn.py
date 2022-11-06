@@ -20,8 +20,6 @@ LAST_W = 4
 FIRST_CH_NUM = 64
 LAST_CN_NUM = FIRST_CH_NUM * 4
 
-RNN_INPUT_SIZE = 3
-RNN_OUT_FEATURES = 3
 
 
 class Conv2dGruConv2d(nn.Module):
@@ -30,6 +28,7 @@ class Conv2dGruConv2d(nn.Module):
         self.rnn_hidden_size = config['rnn_hidden_size']
         self.rnn_num_layers = config['rnn_num_layers']
         self.latent_code_num = config['latent_code_num']
+        self.rnn_latent_code_num = config['rnn_latent_code_num']
 
         self.encoder = nn.Sequential(
             nn.Conv2d(IMG_CHANNEL, FIRST_CH_NUM, kernel_size=4, stride=2, padding=1),
@@ -44,12 +43,12 @@ class Conv2dGruConv2d(nn.Module):
         self.fc12 = nn.Linear(LAST_CN_NUM * LAST_H * LAST_W, self.latent_code_num)
 
         self.rnn = nn.RNN(
-            input_size=RNN_INPUT_SIZE,
+            input_size=self.rnn_latent_code_num,
             hidden_size=self.rnn_hidden_size,
             num_layers=self.rnn_num_layers,
             batch_first=True,
         )
-        self.fc2 = nn.Linear(in_features=self.rnn_hidden_size, out_features=RNN_OUT_FEATURES)
+        self.fc2 = nn.Linear(in_features=self.rnn_hidden_size, out_features=self.rnn_latent_code_num)
 
         self.fc3 = nn.Sequential(
             nn.Linear(self.latent_code_num, 16),

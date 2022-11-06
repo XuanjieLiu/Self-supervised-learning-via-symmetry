@@ -33,6 +33,10 @@ def distanceCalc(v, dt, g=GRAVITY):
     return (v + v - dt * g) * dt / 2
 
 
+def zero_gravity(h, v, dt, g):
+    return h, v
+
+
 def verticalCalc(h, v, dt, g=GRAVITY):
     if (h == 0 and v == 0): return 0.0, 0.0
     timeRemain = dt
@@ -62,6 +66,7 @@ def verticalCalc(h, v, dt, g=GRAVITY):
 def ballNextState(sXYZ, vXYZ, dt, g=GRAVITY):
     nsX, nvX = uniformLinerCalc(sXYZ[0], vXYZ[0], dt)
     nsY, nvY = verticalCalc(sXYZ[1], vXYZ[1], dt, g)
+    # nsY, nvY = zero_gravity(sXYZ[1], vXYZ[1], dt, g)
     nsZ, nvZ = uniformLinerCalc(sXYZ[2], vXYZ[2], dt)
     return [nsX, nsY, nsZ], [nvX, nvY, nvZ]
 
