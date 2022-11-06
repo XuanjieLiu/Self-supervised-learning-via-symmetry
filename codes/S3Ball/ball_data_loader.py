@@ -1,14 +1,18 @@
-import sys
-from os import path
-sys.path.append(path.join(path.dirname(path.abspath(__file__)), '../../'))
-
-import random
-from codes.common_utils import del_file
-import torch
-import numpy as np
 import os
+from os import path
+import sys
+import random
+
+import torch
 from PIL import Image
 from torchvision import transforms
+
+temp_dir = path.abspath(path.join(
+    path.dirname(__file__), '..', 
+))
+sys.path.append(temp_dir)
+from common_utils import del_file
+assert sys.path.pop(-1) == temp_dir
 
 
 def load_a_img_seq_with_position_from_disk(seq_path):
