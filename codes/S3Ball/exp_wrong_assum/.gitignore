@@ -1,2 +1,3 @@
 !template.sbatch
 auto.sbatch
+*/rand_init_*
