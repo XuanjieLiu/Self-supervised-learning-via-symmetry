@@ -71,7 +71,7 @@ def evalEncoder(
                 ), group.config, 
             )
             with torch.no_grad():
-                z, mu, logvar = model.batch_seq_encode_to_z(batch)
+                z, mu, logvar = model.batch_seq_encode_to_z(image_set)
             z_pos = mu[..., :3]
             mse = projectionMSE(z_pos, traj_set)
             Y[rand_init_i].append(mse)
