@@ -3,5 +3,3 @@
 rm ./*.err
 rm ./*.out
 rm ./auto.sbatch
-rm -r ./*/TrainingResults
-rm -r ./*/*.txt
