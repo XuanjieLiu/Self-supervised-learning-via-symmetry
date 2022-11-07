@@ -1,3 +1,4 @@
+import os
 from os import path
 import sys
 
@@ -24,6 +25,11 @@ except ImportError:
     if 1 == 1:
         raise RuntimeError('error o487wryhalegt')
 
-trainer = BallTrainer(CONFIG)
-if is_need_train(CONFIG):
-    trainer.train()
+for rand_init_i in range(6):
+    dir_name = f'rand_init_{rand_init_i}'
+    os.makedirs(dir_name, exist_ok=True)
+    os.chdir(dir_name)
+    trainer = BallTrainer(CONFIG)
+    if is_need_train(CONFIG):
+        trainer.train()
+    os.chdir('..')
