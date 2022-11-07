@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import torch
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 from shared import DEVICE
 from normal_rnn import Conv2dGruConv2d
@@ -57,9 +58,10 @@ def evalEncoder(
         ))
     image_set = torch.cat(videos, dim=0).to(DEVICE)
     traj_set  = torch.cat(trajs,  dim=0).to(DEVICE)
+    print('dataset ready.')
     X = range(len(groups))
     Y = [[] for _ in range(n_rand_inits)]
-    for group in groups:
+    for group in tqdm(groups, 'encoding images'):
         print(group.display)
         for rand_init_i in range(n_rand_inits):
             print(f'{rand_init_i = }')
