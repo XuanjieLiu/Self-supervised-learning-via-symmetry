@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm -r ./*/TrainingResults
-rm -r ./*/*.txt
+rm -rv ./*/TrainingResults
+rm -rv ./*/*.txt
