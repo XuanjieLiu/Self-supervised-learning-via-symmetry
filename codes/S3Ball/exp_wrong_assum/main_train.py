@@ -28,8 +28,15 @@ except ImportError:
 for rand_init_i in range(6):
     dir_name = f'rand_init_{rand_init_i}'
     os.makedirs(dir_name, exist_ok=True)
-    os.chdir(dir_name)
+    CONFIG['train_result_path'] = path.join(
+        dir_name, 'TrainingResults', 
+    )
+    CONFIG['train_record_path'] = path.join(
+        dir_name, 'Train_record.txt', 
+    )
+    CONFIG['eval_record_path'] = path.join(
+        dir_name, 'Eval_record.txt', 
+    )
     trainer = BallTrainer(CONFIG)
     if is_need_train(CONFIG):
         trainer.train()
-    os.chdir('..')
