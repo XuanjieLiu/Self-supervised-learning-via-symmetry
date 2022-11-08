@@ -15,6 +15,7 @@ CONFIG = {
     'rnn_num_layers': 1,
     'rnn_hidden_size': 256,
     'model_path': 'Conv2dGruConv2d_symmetry.pt',
+    'checkpoint_path': 'checkpoint_%d.pt',
     'kld_loss_scalar': 0.01,
     'enable_SRS': True,
     'enable_SRSD': True,

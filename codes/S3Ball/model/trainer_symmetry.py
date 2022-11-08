@@ -49,6 +49,7 @@ class BallTrainer:
         self.mse_loss = nn.MSELoss(reduction='sum').to(DEVICE)
         self.model.to(DEVICE)
         self.model_path = config['model_path']
+        self.checkpoint_path = config['checkpoint_path']
         self.kld_loss_scalar = config['kld_loss_scalar']
         self.z_rnn_loss_scalar = config['z_rnn_loss_scalar']
         self.z_symm_loss_scalar = config['z_symm_loss_scalar']
@@ -229,14 +230,20 @@ class BallTrainer:
             scheduler.step()
 
             if is_log:
-                self.model.save_tensor(self.model.state_dict(), self.model_path)
+                self.model.save_tensor(
+                    self.model.state_dict(), 
+                    self.model_path, 
+                )
                 print(train_loss_counter.make_record(i), flush=True)
                 train_loss_counter.record_and_clear(self.train_record_path, i)
                 # self.save_result_imgs(recon_list, f'{i}_{str(I_sample_points)}', z_rpm.size(1) - 1)
             if is_eval:
                 self.eval(epoch_num - 1, i, eval_loss_counter)
             if i % self.checkpoint_interval == 0 and i != 0:
-                self.model.save_tensor(self.model.state_dict(), f'checkpoint_{i}.pt')
+                self.model.save_tensor(
+                    self.model.state_dict(), 
+                    self.checkpoint_path % i, 
+                )
 
     def batch_symm_z_loss(self, z_gt, z0_rnn, sample_points, symm_batch_multiple, symm_func, symm_reverse_func):
         z_gt_repeat = z_gt.repeat(symm_batch_multiple, 1, 1)
