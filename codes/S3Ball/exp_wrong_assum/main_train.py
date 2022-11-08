@@ -37,6 +37,12 @@ for rand_init_i in range(6):
     CONFIG['eval_record_path'] = path.join(
         dir_name, 'Eval_record.txt', 
     )
+    CONFIG['model_path'] = path.join(
+        dir_name, 'latest.pt', 
+    )
+    CONFIG['checkpoint_path'] = path.join(
+        dir_name, 'checkpoint_%d.pt', 
+    )
     trainer = BallTrainer(CONFIG)
     if is_need_train(CONFIG):
         trainer.train()
