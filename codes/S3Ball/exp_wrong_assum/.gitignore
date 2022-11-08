@@ -1,3 +1,5 @@
 !template.sbatch
 auto.sbatch
 */rand_init_*
+*.out
+*.err
