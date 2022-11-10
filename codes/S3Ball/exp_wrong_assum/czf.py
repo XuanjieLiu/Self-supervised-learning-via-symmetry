@@ -12,7 +12,7 @@ for dir_name in tqdm(DIRS):
     os.chdir(dir_name)
     for rand_i in range(6):
         r_dir = f'rand_init_{rand_i}'
-        dest = path.join('..', ONLY_LATEST, r_dir)
+        dest = path.join('..', ONLY_LATEST, dir_name, r_dir)
         os.makedirs(dest, exist_ok=True)
         for fn in (
             'latest.pt', 
