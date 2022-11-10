@@ -18,7 +18,10 @@ for dir_name in tqdm(DIRS):
             'latest.pt', 
             'Train_record.txt', 'Eval_record.txt', 
         ):
-            shutil.copyfile(fn, path.join(dest, fn))
+            shutil.copyfile(
+                path.join(r_dir, fn), 
+                path.join(dest,  fn), 
+            )
     os.chdir('..')
 print('taring...')
 os.system(f'tar -czf {ONLY_LATEST}.tar.gz {ONLY_LATEST}')
