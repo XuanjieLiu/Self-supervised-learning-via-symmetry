@@ -18,10 +18,16 @@ for dir_name in tqdm(DIRS):
             'latest.pt', 
             'Train_record.txt', 'Eval_record.txt', 
         ):
-            shutil.copyfile(
-                path.join(r_dir, fn), 
-                path.join(dest,  fn), 
-            )
+            try:
+                shutil.copyfile(
+                    path.join(r_dir, fn), 
+                    path.join(dest,  fn), 
+                )
+            except FileNotFoundError as e:
+                print(
+                    'warning:', e, f'{dir_name = }', 
+                    f'{rand_i = }', f'{fn = }', 
+                )
     os.chdir('..')
 print('taring...')
 os.system(f'tar -czf {ONLY_LATEST}.tar.gz {ONLY_LATEST}')
