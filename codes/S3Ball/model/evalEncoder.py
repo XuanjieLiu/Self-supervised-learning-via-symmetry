@@ -37,8 +37,8 @@ def loadModel(filename: str, config):
     return model
 
 def evalEncoder(
-    groups: List[Group], n_rand_inits, 
-    lock_epoch, 
+    groups: List[Group], group_names, 
+    n_rand_inits, pt_name, 
     dataset_path, experiment_path, 
 ):
     dataLoader = BallDataLoader(
@@ -62,18 +62,26 @@ def evalEncoder(
     X = range(len(groups))
     Y = [[] for _ in range(n_rand_inits)]
     for group in tqdm(groups, 'encoding images'):
+        print()
         print(group.display)
         for rand_init_i in range(n_rand_inits):
             print(f'{rand_init_i = }')
-            model = loadModel(
-                path.join(
-                    experiment_path, group.dir_name, 
-                    f'rand_init_{rand_init_i}', 
-                    f'checkpoint_{lock_epoch}.pt', 
-                ), group.config, 
-            )
+            try:
+                model = loadModel(
+                    path.join(
+                        experiment_path, group.dir_name, 
+                        f'rand_init_{rand_init_i}', 
+                        pt_name, 
+                    ), group.config, 
+                )
+            except FileNotFoundError:
+                print('warn: checkpoint not found, skipping.')
+                Y[rand_init_i].append(None)
+                continue
             with torch.no_grad():
-                z, mu, logvar = model.batch_seq_encode_to_z(image_set)
+                z, mu, logvar = model.batch_encode_to_z(
+                    image_set, 
+                )
             z_pos = mu[..., :3]
             mse = projectionMSE(z_pos, traj_set)
             Y[rand_init_i].append(mse)
@@ -84,8 +92,7 @@ def evalEncoder(
             marker='o', markersize=10, 
         )
     plt.ylabel('MSE')
-    plt.xlabel(group.variable_name)
-    plt.xticks(X, [g.variable_value for g in groups])
+    plt.xticks(X, group_names)
     plt.suptitle('Linear projection MSE (↓)')
     plt.savefig(path.join(experiment_path, 'auto_eval_encoder.pdf'))
     plt.show()
