@@ -9,3 +9,11 @@ if HAS_CUDA:
 else:
     DEVICE = CPU
     print("We DON'T have CUDA.")
+
+def loadModel(ModelClass, filename: str, config):
+    model = ModelClass(config).to(DEVICE)
+    model.load_state_dict(torch.load(
+        filename, map_location=DEVICE,
+    ))
+    model.eval()
+    return model

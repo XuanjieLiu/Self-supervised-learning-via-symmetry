@@ -8,7 +8,7 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from shared import DEVICE
+from shared import DEVICE, loadModel
 from normal_rnn import Conv2dGruConv2d
 from linearity_metric import projectionMSE
 
@@ -28,16 +28,8 @@ class Group():
     display: str
     config: dict
 
-def loadModel(filename: str, config):
-    model = Conv2dGruConv2d(config).to(DEVICE)
-    model.load_state_dict(torch.load(
-        filename, map_location=DEVICE,
-    ))
-    model.eval()
-    return model
-
 def evalEncoder(
-    groups: List[Group], group_names, 
+    groups: List[Group], 
     n_rand_inits, pt_name, 
     dataset_path, experiment_path, 
 ):
@@ -68,7 +60,7 @@ def evalEncoder(
             print(f'{rand_init_i = }')
             try:
                 model = loadModel(
-                    path.join(
+                    Conv2dGruConv2d, path.join(
                         experiment_path, group.dir_name, 
                         f'rand_init_{rand_init_i}', 
                         pt_name, 
@@ -92,7 +84,7 @@ def evalEncoder(
             marker='o', markersize=10, 
         )
     plt.ylabel('MSE')
-    plt.xticks(X, group_names)
+    plt.xticks(X, [g.display for g in groups])
     plt.suptitle('Linear projection MSE (↓)')
     plt.savefig(path.join(experiment_path, 'auto_eval_encoder.pdf'))
     plt.show()

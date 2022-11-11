@@ -30,7 +30,7 @@ for group_name in group_names:
     groups.append(g)
 
 evalEncoder(
-    groups, group_names, 
+    groups, 
     6, 'latest.pt', 
     '../Ball3DImg/32_32_0.2_20_3_init_points_EvalSet/', 
     '.', 
