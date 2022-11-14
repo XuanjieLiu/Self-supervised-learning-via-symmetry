@@ -8,7 +8,7 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from shared import DEVICE
+from shared import DEVICE, loadModel
 from normal_rnn import Conv2dGruConv2d
 from linearity_metric import projectionMSE
 
@@ -28,17 +28,9 @@ class Group():
     display: str
     config: dict
 
-def loadModel(filename: str, config):
-    model = Conv2dGruConv2d(config).to(DEVICE)
-    model.load_state_dict(torch.load(
-        filename, map_location=DEVICE,
-    ))
-    model.eval()
-    return model
-
 def evalEncoder(
-    groups: List[Group], n_rand_inits, 
-    lock_epoch, 
+    groups: List[Group], 
+    n_rand_inits, pt_name, 
     dataset_path, experiment_path, 
 ):
     dataLoader = BallDataLoader(
@@ -62,18 +54,26 @@ def evalEncoder(
     X = range(len(groups))
     Y = [[] for _ in range(n_rand_inits)]
     for group in tqdm(groups, 'encoding images'):
+        print()
         print(group.display)
         for rand_init_i in range(n_rand_inits):
             print(f'{rand_init_i = }')
-            model = loadModel(
-                path.join(
-                    experiment_path, group.dir_name, 
-                    f'rand_init_{rand_init_i}', 
-                    f'checkpoint_{lock_epoch}.pt', 
-                ), group.config, 
-            )
+            try:
+                model = loadModel(
+                    Conv2dGruConv2d, path.join(
+                        experiment_path, group.dir_name, 
+                        f'rand_init_{rand_init_i}', 
+                        pt_name, 
+                    ), group.config, 
+                )
+            except FileNotFoundError:
+                print('warn: checkpoint not found, skipping.')
+                Y[rand_init_i].append(None)
+                continue
             with torch.no_grad():
-                z, mu, logvar = model.batch_seq_encode_to_z(image_set)
+                z, mu, logvar = model.batch_encode_to_z(
+                    image_set, 
+                )
             z_pos = mu[..., :3]
             mse = projectionMSE(z_pos, traj_set)
             Y[rand_init_i].append(mse)
@@ -84,8 +84,7 @@ def evalEncoder(
             marker='o', markersize=10, 
         )
     plt.ylabel('MSE')
-    plt.xlabel(group.variable_name)
-    plt.xticks(X, [g.variable_value for g in groups])
+    plt.xticks(X, [g.display for g in groups])
     plt.suptitle('Linear projection MSE (↓)')
     plt.savefig(path.join(experiment_path, 'auto_eval_encoder.pdf'))
     plt.show()
