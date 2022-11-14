@@ -25,24 +25,36 @@ except ImportError:
     if 1 == 1:
         raise RuntimeError('error o487wryhalegt')
 
-for rand_init_i in range(6):
-    dir_name = f'rand_init_{rand_init_i}'
-    os.makedirs(dir_name, exist_ok=True)
-    CONFIG['train_result_path'] = path.join(
-        dir_name, 'TrainingResults', 
-    )
-    CONFIG['train_record_path'] = path.join(
-        dir_name, 'Train_record.txt', 
-    )
-    CONFIG['eval_record_path'] = path.join(
-        dir_name, 'Eval_record.txt', 
-    )
-    CONFIG['model_path'] = path.join(
-        dir_name, 'latest.pt', 
-    )
-    CONFIG['checkpoint_path'] = path.join(
-        dir_name, 'checkpoint_%d.pt', 
-    )
-    trainer = BallTrainer(CONFIG)
-    if is_need_train(CONFIG):
-        trainer.train()
+# for K in (0, 1, 4):
+for K in (0, 1):
+    for rand_init_i in range(6):
+        dir_name = f'k={K}_rand_init_{rand_init_i}'
+        os.makedirs(dir_name, exist_ok=True)
+        config = CONFIG.copy()
+        config['train_result_path'] = path.join(
+            dir_name, 'TrainingResults', 
+        )
+        config['train_record_path'] = path.join(
+            dir_name, 'Train_record.txt', 
+        )
+        config['eval_record_path'] = path.join(
+            dir_name, 'Eval_record.txt', 
+        )
+        config['model_path'] = path.join(
+            dir_name, 'latest.pt', 
+        )
+        config['checkpoint_path'] = path.join(
+            dir_name, 'checkpoint_%d.pt', 
+        )
+        for a in 'tr':
+            for b in ('', 'recon_'): 
+                field = f'{a}_{b}batch_multiple'
+                if CONFIG[field] != 0:
+                    assert CONFIG[field] == 4
+                    # Doing the rest of the experiments. 
+                    # Remove the assert if you are starting from scratch. 
+                    config[field] = K
+
+        trainer = BallTrainer(config)
+        if is_need_train(config):
+            trainer.train()
