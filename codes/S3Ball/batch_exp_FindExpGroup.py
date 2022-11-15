@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append('{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../../'))
-from codes.S3Ball.evalLinearity_A_with_four_zeros_encode import data2z
+from codes.S3Ball.evalLinearity_A_without_four_zeros_encode import data2z
 from evalLinearity_shared import ExpGroup
 from typing import List
 
