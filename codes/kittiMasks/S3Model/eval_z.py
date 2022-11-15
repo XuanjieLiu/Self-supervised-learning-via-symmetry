@@ -1,5 +1,5 @@
 from codes.kittiMasks.S3Model.normal_rnn import Conv2dGruConv2d, LAST_CN_NUM, LAST_H, LAST_W, IMG_CHANNEL
-from codes.kittiMasks.batch_exp.t3-k1-vae import CONFIG
+from codes.kittiMasks.batch_exp.t3_k1_vae.train_config import CONFIG
 from tkinter import *
 from PIL import Image, ImageTk
 from torchvision.utils import save_image
@@ -13,7 +13,7 @@ IMG_PATH = 'vae3DBallEval_ImgBuffer'
 IGM_NAME = IMG_PATH + "/test.png"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-MODEL_PATH = 'Conv2dGruConv2d_symmetry.pt'
+MODEL_PATH = '../batch_exp/beta_vae/'
 
 
 def init_img_path():
