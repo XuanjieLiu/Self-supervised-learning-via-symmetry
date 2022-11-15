@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
-from shared import DEVICE
+from codes.S3Ball.shared import DEVICE
 
 ROTATION = 'Rot'
 TRANSLATION = 'Trs'
@@ -100,6 +100,20 @@ def make_rotation_Y_batch(batch_size, angel_range=(-0.25 * math.pi, 0.25 * math.
     return s, s_r, theta.numpy()
 
 
+def make_rotation_2d_batch(batch_size, angel_range=(-0.25 * math.pi, 0.25 * math.pi)):
+    scale = angel_range[1] - angel_range[0]
+    theta = torch.rand(batch_size) * scale + angel_range[0]
+    s = torch.stack([
+        torch.stack([torch.cos(theta), -torch.sin(theta)], dim=0),
+        torch.stack([torch.sin(theta), torch.cos(theta)], dim=0)
+    ], dim=0).to(DEVICE).permute(2, 0, 1).contiguous()
+    s_r = torch.stack([
+        torch.stack([torch.cos(-theta), -torch.sin(-theta)], dim=0),
+        torch.stack([torch.sin(-theta), torch.cos(-theta)], dim=0)
+    ], dim=0).to(DEVICE).permute(2, 0, 1).contiguous()
+    return s, s_r, theta.numpy()
+
+
 def make_translation_batch(
     auged_batch_size, n_dims, latent_code_num, 
     is_std_normal=False, t_range=(-1, 1), 
@@ -110,6 +124,17 @@ def make_translation_batch(
     else:
         T_mat = torch.rand(auged_batch_size, n_dims) * scale + t_range[0]
     T = F.pad(T_mat.to(DEVICE), (0, latent_code_num - n_dims, ))
+    T_R = -T
+    return T, T_R
+
+
+def make_translation_batch_2(batch_size, dim=np.array([1, 0, 1]), is_std_normal=False, t_range=(-1, 1)):
+    scale = t_range[1] - t_range[0]
+    if is_std_normal:
+        T_mat = torch.randn(batch_size, len(dim))
+    else:
+        T_mat = torch.rand(batch_size, len(dim)) * scale + t_range[0]
+    T = T_mat.mul(torch.from_numpy(dim)).cuda()
     T_R = -T
     return T, T_R
 
