@@ -9,7 +9,7 @@ ORIGINAL_DATA_PATH = 'kitti_peds_v2.pickle'
 TARGET_TRAIN_PATH = 'kitti_train.pickle'
 TARGET_EVAL_PATH = 'kitti_eval.pickle'
 MIN_SEQ = 12
-USE_ALL = False
+USE_ALL = True
 TEST_SET_SIZE = 320
 
 

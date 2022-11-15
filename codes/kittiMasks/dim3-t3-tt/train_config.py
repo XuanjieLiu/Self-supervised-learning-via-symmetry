@@ -1,8 +1,10 @@
 import math
+import os
 
+data_root = '{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../../data/kitti')
 CONFIG = {
-    'train_data_path': '../data/kitti/kitti_train.pickle',
-    'eval_data_path': '../data/kitti/kitti_eval.pickle',
+    'train_data_path': f'{data_root}/kitti_train.pickle',
+    'eval_data_path': f'{data_root}/kitti_eval.pickle',
     'rnn_latent_code_num': 3,
     'latent_code_num': 3,
     't_batch_multiple': 1,
@@ -20,14 +22,14 @@ CONFIG = {
     'kld_loss_scalar': 0.01,
     'enable_SRS': True,
     'enable_SRSD': True,
-    'z_rnn_loss_scalar': 2,
-    'z_symm_loss_scalar': 2,
+    'z_rnn_loss_scalar': 20,
+    'z_symm_loss_scalar': 20,
     'enable_sample': True,
     'checkpoint_interval': 2000,
-    'learning_rate': 1e-3,
+    'learning_rate': 1e-4,
     'scheduler_base_num': 0.99999,
-    'max_iter_num': 50001,
-    'base_len': 5,
+    'max_iter_num': 20001,
+    'base_len': 4,
     'train_result_path': 'TrainingResults/',
     'train_record_path': "Train_record.txt",
     'eval_record_path': "Eval_record.txt",
