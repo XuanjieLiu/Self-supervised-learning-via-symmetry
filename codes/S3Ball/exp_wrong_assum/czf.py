@@ -20,7 +20,7 @@ for dir_name in tqdm(DIRS):
             dest = path.join('..', ONLY_LATEST, dir_name, r_dir)
             os.makedirs(dest, exist_ok=True)
             for fn in (
-                'latest.pt', 
+                'latest.pt', 'train_config.py', 
                 'Train_record.txt', 'Eval_record.txt', 
             ):
                 try:
