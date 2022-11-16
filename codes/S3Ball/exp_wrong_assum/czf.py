@@ -31,7 +31,7 @@ for dir_name in tqdm(DIRS):
                 except FileNotFoundError as e:
                     print(
                         'warning:', e, f'{dir_name = }', 
-                        f'{rand_i = }', f'{fn = }', 
+                        # f'{r_dir = }', f'{fn = }', 
                     )
     os.chdir('..')
 print('taring...')
