@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import pickle
 
 import torch
-import matplotlib
+import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
@@ -95,6 +95,7 @@ def getData():
     image_set = torch.cat(videos, dim=0).to(DEVICE)
     traj_set  = torch.cat(trajs,  dim=0).to(DEVICE)
     print('dataset ready.')
+    # Y = np.zeros((n_groups, n_Ks, n_rand_inits))
     Y = [[] for _ in range(n_groups * n_Ks)]
     for i_group, group in enumerate(tqdm(groups, 'encoding images')):
         print()
@@ -115,11 +116,12 @@ def getData():
                 except FileNotFoundError:
                     print('   warn: checkpoint not found, skipping.')
                     groupY.append(None)
+                    raise Exception
                     # Temporary fix
-                    groupY[-1] = 0
-                    from time import time
-                    if time() > 1668575354.2033336 + 60 * 60 * 5:
-                        raise Exception
+                    # groupY[-1] = 0
+                    # from time import time
+                    # if time() > 1668575354.2033336 + 60 * 60 * 5:
+                    #     raise Exception
                     continue
                 with torch.no_grad():
                     z, mu, logvar = model.batch_encode_to_z(
@@ -158,7 +160,7 @@ def plot(Y):
 
 def main():
     fillConfigs()
-    SAVE_FILE = 'fig8_cache.pickle'
+    SAVE_FILE = 'plot_cache.pickle'
     try:
         with open(SAVE_FILE, 'rb') as f:
             if input('Cache found. Use cache? y/n >') == 'y':
