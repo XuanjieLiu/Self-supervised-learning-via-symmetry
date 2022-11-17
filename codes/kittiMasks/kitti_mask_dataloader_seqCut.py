@@ -49,6 +49,7 @@ class KittiMasks(Dataset):
             self.transform = None
 
         self.load_data()
+        print(f'datasize:{self.__len__()}')
 
     def load_data(self):
         # download if not avaiable

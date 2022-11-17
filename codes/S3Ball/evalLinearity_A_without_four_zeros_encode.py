@@ -8,7 +8,6 @@ from ball_data_loader import BallDataLoader
 from shared import *
 from evalLinearity_shared import *
 
-DATASET_SIZE = 1024
 
 def data2z(dataset_path, exp_groups):
     dataLoader = BallDataLoader(
