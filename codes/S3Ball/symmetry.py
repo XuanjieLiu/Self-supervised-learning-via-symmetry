@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
-from codes.S3Ball.shared import DEVICE
+from shared import DEVICE
 
 ROTATION = 'Rot'
 TRANSLATION = 'Trs'
