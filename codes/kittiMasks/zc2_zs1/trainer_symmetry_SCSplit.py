@@ -1,4 +1,5 @@
 import os
+import random
 import numpy as np
 import torch
 import torch.nn as nn
@@ -13,10 +14,21 @@ from codes.kittiMasks.S3Model.normal_rnn import Conv2dGruConv2d
 # ))
 # sys.path.append(temp_dir)
 from codes.kittiMasks.kitti_mask_dataloader_seqCut import KittiMasks
-from codes.S3Ball.symmetry import make_translation_batch, make_rotation_batch, do_seq_symmetry, symm_trans, symm_rota
+from codes.S3Ball.symmetry import make_translation_batch, make_rotation_batch, do_seq_symmetry, symm_trans, symm_rota, \
+    make_rotation_2d_batch, symm_rotaY
 from codes.loss_counter import LossCounter
 from codes.common_utils import create_results_path_if_not_exist
+# assert sys.path.pop(-1) == temp_dir
 
+def repeat_color_dim(z, repeat_times=None, sample_range=None):
+    length = z.size(1)
+    if sample_range is None:
+        sample_range = length
+    if repeat_times is None:
+        repeat_times = length
+    r_dim = random.sample(range(sample_range), 1)[0]
+    r_tensor = z[:, r_dim:r_dim+1, :]
+    return r_tensor.repeat(1, repeat_times, 1)
 
 def is_need_train(train_config):
     loss_counter = LossCounter([])
@@ -78,6 +90,7 @@ class Trainer:
         self.enable_SRSD = config['enable_SRSD']
         self.is_save_img = config['is_save_img']
         self.is_prior_model = config['is_prior_model']
+        self.rnn_latent_code_num = config['rnn_latent_code_num']
 
     def save_result_imgs(self, img_list, name, seq_len):
         os.makedirs(self.train_result_path, exist_ok=True)
@@ -207,6 +220,8 @@ class Trainer:
                 T_sample_points = self.gen_sample_points(self.base_len, data.size(1), curr_iter, self.enable_sample)
                 R_sample_points = self.gen_sample_points(self.base_len, data.size(1), curr_iter, self.enable_sample)
                 z_rpm, mu, logvar = self.model.batch_seq_encode_to_z(data)
+                z_gt_s = z_rpm[..., 0:2]
+                z_gt_c = z_rpm[..., 2:]
                 if self.t_batch_multiple:
                     T, Tr = make_translation_batch(
                         data.size(0) * self.t_batch_multiple,
@@ -214,9 +229,8 @@ class Trainer:
                         t_range=self.t_range,
                     )
                 if self.r_batch_multiple:
-                    R, Rr = make_rotation_batch(
-                        data.size(0), self.r_batch_multiple,
-                        n_dims=self.r_n_dims,
+                    R, Rr, theta = make_rotation_2d_batch(
+                        data.size(0) * self.r_batch_multiple,
                         angel_range=self.r_range,
                     )
                 if self.is_prior_model:
@@ -242,12 +256,12 @@ class Trainer:
                 if self.enable_SRSD and self.r_batch_multiple:
                     R_z_loss = self.batch_symm_z_loss(
                         z_rpm, z0_rnn, R_sample_points, self.r_batch_multiple,
-                        lambda z: symm_rota(z, R), lambda z: symm_rota(z, Rr)
+                        lambda z: symm_rotaY(z, R), lambda z: symm_rotaY(z, Rr)
                     )
                     R_recon_loss = self.batch_symm_recon_loss(
                         data[:, 1:, :, :, :], z_rpm,
                         R_sample_points, self.r_recon_batch_multiple,
-                        lambda z: symm_rota(z, R), lambda z: symm_rota(z, Rr),
+                        lambda z: symm_rotaY(z, R), lambda z: symm_rotaY(z, Rr),
                     )
                 else:
                     R_z_loss = torch.zeros(2, device=DEVICE)

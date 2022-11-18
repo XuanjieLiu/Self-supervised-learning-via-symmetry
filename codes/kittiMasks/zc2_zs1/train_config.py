@@ -5,7 +5,7 @@ data_root = '{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../data/
 CONFIG = {
     'train_data_path': f'{data_root}/kitti_train.pickle',
     'eval_data_path': f'{data_root}/kitti_eval.pickle',
-    'rnn_latent_code_num': 3,
+    'rnn_latent_code_num': 2,
     'latent_code_num': 3,
     't_batch_multiple': 1,
     'r_batch_multiple': 0,
@@ -13,7 +13,7 @@ CONFIG = {
     'r_recon_batch_multiple': 0,
     't_range': (-1, 1),
     'r_range': (-math.pi, math.pi),
-    't_n_dims': 3,
+    't_n_dims': 2,
     'r_n_dims': 2, 
     'rnn_num_layers': 1,
     'rnn_hidden_size': 256,
