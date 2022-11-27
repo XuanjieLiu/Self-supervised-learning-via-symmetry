@@ -12,7 +12,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-
 temp_dir = path.abspath(path.join(
     path.dirname(__file__), '../model', 
 ))
@@ -31,7 +30,7 @@ from S3Ball.ball_data_loader import BallDataLoader
 import S3Ball.rc_params as rc_params
 assert sys.path.pop(-1) == temp_dir
 
-rc_params.init(font_size=12)
+rc_params.init()
 plt.rc('text.latex', preamble=r'\usepackage{amssymb}')
 
 BATCH_SIZE = 256
@@ -70,10 +69,12 @@ def fillConfigs():
         g = Group(group_name, {
             'T2': '$$(\mathbb{R}^2, +)$$', 
             'R2': '$$\mathrm{SO}(2)$$', 
-            'T1R2': '$$(\mathbb{R}^1, +) \\times \mathrm{SO}(2)$$', 
-            'T3R2': '$$(\mathbb{R}^3, +) \\times \mathrm{SO}(2)$$', 
-            'T2R3': '$$(\mathbb{R}^2, +) \\times \mathrm{SO}(3)$$', 
-        }[group_name], config)
+            'T1R2': '$$(\mathbb{R}^1, +) $$\n$$ \\times $$\n$$ \mathrm{SO}(2)$$', 
+            'T3R2': '$$(\mathbb{R}^3, +) $$\n$$ \\times $$\n$$ \mathrm{SO}(2)$$', 
+            'T2R3': '$$(\mathbb{R}^2, +) $$\n$$ \\times $$\n$$ \mathrm{SO}(3)$$', 
+        }[group_name]
+            # .replace('$$\n$$ ', '')
+        , config)
         groups.append(g)
 
 def getData():
@@ -95,14 +96,12 @@ def getData():
     image_set = torch.cat(videos, dim=0).to(DEVICE)
     traj_set  = torch.cat(trajs,  dim=0).to(DEVICE)
     print('dataset ready.')
-    # Y = np.zeros((n_groups, n_Ks, n_rand_inits))
-    Y = [[] for _ in range(n_groups * n_Ks)]
+    Y = np.zeros((n_groups, n_Ks, n_rand_inits))
     for i_group, group in enumerate(tqdm(groups, 'encoding images')):
         print()
         print(group.display)
         for i_k, k in enumerate(Ks):
             print(f' {k = }')
-            groupY = Y[i_group * n_Ks + i_k]
             for rand_init_i in range(n_rand_inits):
                 print(f'  {rand_init_i = }')
                 try:
@@ -115,13 +114,10 @@ def getData():
                     )
                 except FileNotFoundError:
                     print('   warn: checkpoint not found, skipping.')
-                    groupY.append(None)
-                    raise Exception
-                    # Temporary fix
-                    # groupY[-1] = 0
-                    # from time import time
-                    # if time() > 1668575354.2033336 + 60 * 60 * 5:
-                    #     raise Exception
+                    Y[i_group, i_k, rand_init_i] = -1
+                    from time import time
+                    if time() > 1668660579.0168521 + 60 * 60 * 2:
+                        raise Exception
                     continue
                 with torch.no_grad():
                     z, mu, logvar = model.batch_encode_to_z(
@@ -129,23 +125,17 @@ def getData():
                     )
                 z_pos = mu[..., :3]
                 mse = projectionMSE(z_pos, traj_set)
-                groupY.append(mse)
+                Y[i_group, i_k, rand_init_i] = mse
     return Y
 
-def plot(Y):
+def plotMultiPanels(Y, baseline):
     fig = plt.figure(figsize=(9, 3))
     axes = fig.subplots(1, n_groups, sharey=True)
     X = [*range(1, n_Ks + 1)]
     for col_i, ax in enumerate(axes):
-        Ys = (Y[col_i], Y[col_i + n_groups],  Y[col_i + 2 * n_groups])
-        # for x, y in zip(X, Ys):
-        #     ax.plot(
-        #         [x] * n_rand_inits, y, linestyle='none', 
-        #         markerfacecolor='none', 
-        #         markeredgecolor=(.6, ) * 3, 
-        #         marker='o', markersize=10, 
-        #     )
-        ax.boxplot(Ys)
+        groupY = [Y[col_i, ik, :] for ik in range(n_Ks)]
+        groupY[0] = baseline
+        ax.boxplot(groupY)
         ax.set_xlabel('$$K$$')
         ax.set_xticks(X)
         ax.set_xticklabels(Ks)
@@ -154,6 +144,29 @@ def plot(Y):
         ax.axhline(0, c='b')
     axes[0].set_ylabel('Linear proj. loss')
     # plt.suptitle('Linear projection MSE (↓)')
+    plt.tight_layout()
+    # plt.savefig(path.join(experiment_path, 'auto_eval_encoder.pdf'))
+    plt.show()
+
+def plotSinglePanel(Y, baseline):
+    plt.figure(figsize=(6, 3))
+    X = [*range(1, n_groups + 2)]
+    listY = [baseline]
+    assert Ks[2] == 4   # I want k=4
+    for ig in range(n_groups):
+        listY.append(Y[ig, 2, :])
+    plt.boxplot(listY)
+    # plt.xlabel('Incorrect Group Assumption')
+    plt.xticks(
+        X, ['w/o \n Symmetry', *[
+            g.display for g in groups
+        ]], 
+        # rotation=-90, 
+    )
+    # plt.xlim(.8, 0.2 + n_groups)
+    plt.ylim(bottom=0)
+    # plt.axhline(0, c='b')
+    plt.ylabel('Linear proj. loss')
     plt.tight_layout()
     # plt.savefig(path.join(experiment_path, 'auto_eval_encoder.pdf'))
     plt.show()
@@ -175,7 +188,14 @@ def main():
         print('Caching...')
         with open(SAVE_FILE, 'wb') as f:
             pickle.dump(Y, f)
+
+    baseline = np.zeros((n_groups, n_rand_inits))
+    assert Ks[0] == 0
+    for ig in range(n_groups):
+        for ir in range(n_rand_inits):
+            baseline[ig, ir] = Y[ig, 0, ir]
+    baseline = baseline.flatten()
     print('plotting...')
-    plot(Y)
+    plotSinglePanel(Y, baseline)
 
 main()

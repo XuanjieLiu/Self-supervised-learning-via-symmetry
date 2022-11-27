@@ -1,3 +1,5 @@
+from os import path
+import sys
 import math
 import random
 import time
@@ -6,7 +8,12 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
+temp_dir = path.abspath(path.join(
+    path.dirname(__file__), '../..', 
+))
+sys.path.append(temp_dir)
 from codes.S3Ball.shared import DEVICE
+assert sys.path.pop(-1) == temp_dir
 
 ROTATION = 'Rot'
 TRANSLATION = 'Trs'
