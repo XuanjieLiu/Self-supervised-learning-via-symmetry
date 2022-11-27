@@ -1,33 +1,10 @@
 import sys
 import os
+from codes.kittiMasks.batch_exp.common_param import BATCH_EXP, SUB_EXP_LIST, CHECK_POINT_NUM_LIST
 sys.path.append('{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../../../'))
 from common_train_config import CONFIG
 from codes.kittiMasks.S3Model.trainer_symmetry import Trainer
 
-BATCH_EXP = [
-    {
-        'dir': 'beta_vae',
-        'name': 'beta-VAE'
-    }, {
-        'dir': 'noSymm_vae',
-        'name': 'Ours w/o symmetry'
-    }, {
-        'dir': 't3_k1_ae',
-        'name': 'T3 AE',
-    }, {
-        'dir': 't3_k1_vae',
-        'name': 'T3 VAE',
-    }, {
-        'dir': 't3_r2_k1_ae',
-        'name': 'T3 R2 AE',
-    }, {
-        'dir': 't3_r2_k1_vae',
-        'name': 'T3 R2 VAE',
-    },
-]
-
-CHECK_POINT_NUM_LIST = [i*2000 for i in range(1, 11)]
-SUB_EXP_LIST = [str(i) for i in range(1, 31)]
 
 BATCH_ROOT = os.path.dirname(os.path.abspath(__file__))
 

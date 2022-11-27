@@ -8,8 +8,7 @@ from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 import pyperclip
 
-from shared import *
-from evalLinearity_shared import *
+from codes.S3Ball.evalLinearity_shared import *
 
 
 class Dataset(torch.utils.data.Dataset):

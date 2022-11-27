@@ -119,14 +119,14 @@ def sub_boxplot_by_datasize(batch_result_list: List[BatchExpResult]):
             axs[i].boxplot([br.best_mse_list for br in brs], showfliers=False)
             axs[i].set_title(f'{DATA_SIZE_ORDER[i]} Samples')
             axs[i].set_xticklabels([f'{br.symm}' for br in brs])
-            axs[i].axhline(y=0, c='b')
+
     sup_plot()
 
     for ax in axs.flat:
         ax.set(ylabel='Linear proj. loss', xlabel='$$K$$')
     for ax in axs.flat:
         ax.label_outer()
-
+    plt.ylim(bottom=0)
     plt.show()
 
 
