@@ -2,12 +2,13 @@ import math
 import sys
 import os
 import numpy as np
+from codes.kittiMasks.batch_exp.common_param import SUB_EXP_LIST, EVAL_RECORD_NAME, AMENDED_EVAL_NAME
 sys.path.append('{}{}'.format(os.path.dirname(os.path.abspath(__file__)), '/../../'))
 import matplotlib.pyplot as plt
 from typing import List
 
 
-EVAL_RECORD_NAME = 'Eval_record.txt'
+
 plt.rcParams.update({
     'text.usetex': True,
     'font.family': 'serif',
@@ -15,32 +16,21 @@ plt.rcParams.update({
     'font.size': 7,
 })
 
+BATCH_ROOT = "./"
+
+
 BATCH_EXP = [
     {
-        'dir': 'beta_vae',
-        'name': 'beta-VAE'
-    }, {
         'dir': 'noSymm_vae',
         'name': 'Ours w/o symmetry'
     }, {
-        'dir': 't3_k1_ae',
-        'name': 'T3 AE',
+        'dir': 'beta_vae',
+        'name': 'beta-VAE'
     }, {
         'dir': 't3_k1_vae',
         'name': 'T3 VAE',
-    }, {
-        'dir': 't3_r2_k1_ae',
-        'name': 'T3 R2 AE',
-    }, {
-        'dir': 't3_r2_k1_vae',
-        'name': 'T3 R2 VAE',
     },
 ]
-
-DATA_SIZE_ORDER = [256, 512, 1024, 2048]
-SYMM_ORDER = [0, 4, 16]
-BATCH_ROOT = "./"
-SUB_EXP_LIST = [str(i) for i in range(1, 31)]
 
 
 class BatchExpResult:
@@ -51,6 +41,8 @@ class BatchExpResult:
         self.secondary_best_results = []
         self.third_best_result = []
         self.best_idx = []
+        self.results_mean = {}
+        self.results_std = {}
 
 
 def find_results2best_primary(primary_idx: int, secondary_idx: int, third_idx:int, eval_result_path):
@@ -73,11 +65,11 @@ def stat_batch_result(batch_path_root, primary_idx, secondary_idx, third_idx):
         br = BatchExpResult()
         br.name = exp['name']
         exp_path = os.path.join(batch_path_root, exp['dir'])
-        sub_exp_list = list(filter(lambda sub_exp_name: sub_exp_name in SUB_EXP_LIST, os.listdir(exp_path)))
-        if len(sub_exp_list) == 0:
-            print(f"No sub_exp in {exp_path}")
-            continue
-        for sub_exp in sub_exp_list:
+        # sub_exp_list = list(filter(lambda sub_exp_name: sub_exp_name in SUB_EXP_LIST, os.listdir(exp_path)))
+        # if len(sub_exp_list) == 0:
+        #     print(f"No sub_exp in {exp_path}")
+        #     continue
+        for sub_exp in SUB_EXP_LIST:
             eval_result_path = os.path.join(exp_path, sub_exp, EVAL_RECORD_NAME)
             max_primary, secondary, third, best_idx = find_results2best_primary(primary_idx, secondary_idx, third_idx, eval_result_path)
             br.primary_best_results.append(max_primary)
@@ -105,13 +97,13 @@ def stat_projmse_by_recon(batch_path_root):
         """primary: self-recon; secondary: pred-recon; third: proj_mse"""
         for sub_exp in sub_exp_list:
             """0-self_recon, 1-prior_recon, 2-self_recon_norm, 3-prior_recon_norm, 4-prior_z_norm, 5-xyz_mse"""
-            eval_result_path = os.path.join(exp_path, sub_exp, EVAL_RECORD_NAME)
+            eval_result_path = os.path.join(exp_path, sub_exp, AMENDED_EVAL_NAME)
             if br.path == 'beta_vae':
-                max_primary, secondary, third, best_idx = find_results2best_primary(2, 3, 5, eval_result_path)
+                max_primary, secondary, third, best_idx = find_results2best_primary(2, 3, 7, eval_result_path)
                 br.primary_best_results.append(max_primary)
                 br.secondary_best_results.append(secondary)
             else:
-                max_primary, secondary, third, best_idx = find_results2best_primary(3, 2, 5, eval_result_path)
+                max_primary, secondary, third, best_idx = find_results2best_primary(3, 2, 7, eval_result_path)
                 br.primary_best_results.append(secondary)
                 br.secondary_best_results.append(max_primary)
             br.third_best_result.append(third)

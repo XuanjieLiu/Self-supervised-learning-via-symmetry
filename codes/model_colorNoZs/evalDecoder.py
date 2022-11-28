@@ -1,4 +1,4 @@
-from codes.kittiMasks.S3Model.normal_rnn import Conv2dGruConv2d, LAST_CN_NUM, LAST_H, LAST_W, IMG_CHANNEL
+from normal_rnn import Conv2dGruConv2d, LAST_CN_NUM, LAST_H, LAST_W, IMG_CHANNEL
 from train_config import CONFIG
 from tkinter import *
 from PIL import Image, ImageTk
@@ -13,7 +13,7 @@ IMG_PATH = 'vae3DBallEval_ImgBuffer'
 IGM_NAME = IMG_PATH + "/test.png"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-MODEL_PATH = 'beta-vae_10_6000.pt'
+MODEL_PATH = 'checkpoint_10000.pt'
 
 
 def init_img_path():

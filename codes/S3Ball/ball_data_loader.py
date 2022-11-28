@@ -11,7 +11,7 @@ temp_dir = path.abspath(path.join(
     path.dirname(__file__), '..', 
 ))
 sys.path.append(temp_dir)
-from common_utils import del_file
+from codes.common_utils import del_file
 assert sys.path.pop(-1) == temp_dir
 
 

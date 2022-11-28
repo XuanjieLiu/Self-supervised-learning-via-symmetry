@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import List
 from functools import lru_cache
 
-from codes.S3Ball.Continue_ColorfulBall_Rnn256_45dimColor.normal_rnn import Conv2dGruConv2d, BATCH_SIZE
-from codes.S3Ball.Continue_ColorfulBall_Rnn256_45dimColor.train_config import CONFIG
+from codes.kittiMasks.S3Model.normal_rnn import Conv2dGruConv2d
+from train_config import CONFIG
 from codes.S3Ball.shared import *
 
 @lru_cache(16)
@@ -31,21 +31,21 @@ class ExpGroup:
 
 
 eG = ExpGroup()
-eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm0_VAE_cp150000_(AB).pt'
+eG.checkpoint_path = './noSymm4_0.1488.pt'
 eG.display_name = 'Ours w/o Symmetry'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/vae_aug_0.txt'
-eG.n_latent_dims = 5
+eG.n_latent_dims = 3
 ablat = eG
 
 eG = ExpGroup()
-eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/continue_symm4_VAE_1_cp140000.pt'
+eG.checkpoint_path = './our0.1416t3vae.pt'
 eG.display_name = 'SPS (Ours)'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/vae_aug_4.txt'
-eG.n_latent_dims = 5
+eG.n_latent_dims = 3
 ours = eG
 
 eG = ExpGroup()
-eG.checkpoint_path = './evalLinearity_A_with_four_zeros/checkpoints/beta_vae_no_color_checkpoint_110000.pt'
+eG.checkpoint_path = './beta-vae_10_6000.pt'
 eG.display_name = '$\\beta$-VAE (Baseline)'
 eG.z_coords_map_path = './evalLinearity_A_with_four_zeros/z_coords_map/beta_vae.txt'
 eG.n_latent_dims = 3
@@ -75,7 +75,7 @@ ae_2 = eG
 if True:
     # normal
     QUANT_EXP_GROUPS: List[ExpGroup] = [
-        beta_vae, ablat, ours, 
+         ours, ablat, beta_vae
     ]
 else:
     # vae vs ae
@@ -85,5 +85,5 @@ else:
     ]
 
 VISUAL_EXP_GROUPS: List[ExpGroup] = [
-    beta_vae, ablat, ours, 
+    ours, ablat, beta_vae
 ]
