@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from os import path
 import sys
 from importlib import reload
@@ -148,19 +149,20 @@ def plotMultiPanels(Y, baseline):
     # plt.savefig(path.join(experiment_path, 'auto_eval_encoder.pdf'))
     plt.show()
 
-def plotSinglePanel(Y, baseline):
+def plotSinglePanel(Y, baseline, ours):
     plt.figure(figsize=(6, 3))
-    X = [*range(1, n_groups + 2)]
+    X = [*range(1, n_groups + 3)]
     listY = [baseline]
     assert Ks[2] == 4   # I want k=4
     for ig in range(n_groups):
         listY.append(Y[ig, 2, :])
+    listY.append(ours)
     plt.boxplot(listY)
     # plt.xlabel('Incorrect Group Assumption')
     plt.xticks(
         X, ['w/o \n Symmetry', *[
             g.display for g in groups
-        ]], 
+        ], '$$(\mathbb{R}^2, +) $$\n$$ \\times $$\n$$ \mathrm{SO}(2)$$\n(Ours)'], 
         # rotation=-90, 
     )
     # plt.xlim(.8, 0.2 + n_groups)
@@ -195,7 +197,25 @@ def main():
         for ir in range(n_rand_inits):
             baseline[ig, ir] = Y[ig, 0, ir]
     baseline = baseline.flatten()
+
+    ours = getOurs()
+
     print('plotting...')
-    plotSinglePanel(Y, baseline)
+    plotSinglePanel(Y, baseline, ours)
+
+def getOurs():
+    os.chdir('Rnn256_DataSize_2048_symm_4_4')
+    dirs = [x for x in os.listdir() if path.isdir(x)]
+    ours = []
+    for dir_name in tqdm(dirs):
+        with open(path.join(
+            dir_name, 'mse_result_150000.txt', 
+        ), 'r') as f:
+            mses = f.read().strip().split(',')
+            mses = [float(x) for x in mses]
+            assert abs(sum(mses[:3]) / 3 - mses[3]) < .0000001
+            ours.append(mses[3])
+    os.chdir('..')
+    return ours
 
 main()
