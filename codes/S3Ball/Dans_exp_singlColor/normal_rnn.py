@@ -88,9 +88,9 @@ class Conv2dGruConv2d(nn.Module):
     def batch_encode_to_z(self, x):
         out = self.encoder(x)
         mu = self.fc11(out.view(out.size(0), -1))
-        logvar = self.fc12(out.view(out.size(0), -1))
-        z1 = self.reparameterize(mu, logvar)
         if self.is_VAE:
+            logvar = self.fc12(out.view(out.size(0), -1))
+            z1 = self.reparameterize(mu, logvar)
             return z1, mu, logvar
         else:
             return mu, mu, mu
