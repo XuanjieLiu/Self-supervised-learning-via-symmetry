@@ -12,5 +12,5 @@
 #SBATCH --error={OUT_FILENAME}.err
 
 module purge
-source /scratch/$USER/py_env/symmEnv/select_images
+source /scratch/$USER/py_env/xjEnv/select_images
 singularity exec --nv --overlay /scratch/$USER/py_env/$ENV_NAME/$OVERLAY:ro /scratch/work/public/singularity/$SINGULARITY /bin/bash -c 'source /ext3/env.sh; {CMDS}'
