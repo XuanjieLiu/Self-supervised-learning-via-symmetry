@@ -1,1 +1,4 @@
 !template.sbatch
+*.out
+*.err
+auto.sbatch
