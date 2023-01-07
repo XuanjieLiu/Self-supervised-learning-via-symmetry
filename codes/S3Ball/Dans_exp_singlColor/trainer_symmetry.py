@@ -114,7 +114,7 @@ class BallTrainer:
             print("New model is initialized")
 
     def eval(self, epoch_num, iter_num, eval_loss_counter):
-        print("=====================start eval=======================")
+        print("=====================start eval=======================", flush=True)
         self.model.eval()
         z_gt_list = []
         z0_rnn_list = []
@@ -156,7 +156,7 @@ class BallTrainer:
                                       vae_recon_loss_pixel_mean, rnn_recon_loss_pixel_mean, rnn_z_loss,
                                       x_mse, y_mse, z_mse, xyz_mse])
         eval_loss_counter.record_and_clear(self.eval_record_path, iter_num, round_idx=4)
-        print("=====================end eval=======================")
+        print("=====================end eval=======================", flush=True)
 
     def scheduler_func(self, curr_iter):
         return self.scheduler_base_num ** curr_iter
@@ -181,7 +181,7 @@ class BallTrainer:
         for i in range(iter_num, self.max_iter_num):
             curr_iter = iter_num
             data, new_epoch_num, progress = self.train_data_loader.load_a_batch_from_an_epoch(BATCH_SIZE)
-            print(f'{i}, {epoch_num}, {progress * 100}%')
+            print(f'{i}, {epoch_num}, {progress * 100}%', flush=True)
             data = data.to(DEVICE)
             is_log = (i % self.log_interval == 0 and i != 0)
             recon_list = [data[:, 1:, ...]] if is_log and self.is_save_img else None
